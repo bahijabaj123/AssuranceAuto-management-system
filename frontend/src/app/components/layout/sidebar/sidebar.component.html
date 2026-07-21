@@ -1,0 +1,128 @@
+<!-- src/app/components/layout/sidebar/sidebar.component.html -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <img src="/assets/logocarte.webp" alt="Carte Assurances" class="sidebar-logo-img" />
+  </div>
+
+  <div class="nav-section">
+
+    <!-- ============================================================ -->
+    <!-- GESTION DES DOSSIERS -->
+    <!-- ============================================================ -->
+    <div class="nav-label">📋 Gestion des dossiers</div>
+    
+    <!-- ✅ Recherche sinistre avec le même style que les autres -->
+    <a class="nav-item" routerLink="/gestion/recherche-dossier" routerLinkActive="active">
+      <i class="fa fa-search" aria-hidden="true"></i>
+      Recherche sinistre
+    </a>
+
+    
+    
+    <a class="nav-item" routerLink="/gestion/etat-suivi" routerLinkActive="active">
+      <i class="fa fa-tasks" aria-hidden="true"></i>
+      État et suivi des dossiers
+      <span class="nav-badge">412</span>
+    </a>
+    
+    <a class="nav-item" routerLink="/gestion/sort-jug" routerLinkActive="active">
+      <i class="fa fa-gavel" aria-hidden="true"></i>
+      Sort Jug
+    </a>
+    
+    <a class="nav-item" routerLink="/gestion/doss-provisoires" routerLinkActive="active">
+      <i class="fa fa-file-o" aria-hidden="true"></i>
+      Dossiers provisoires
+    </a>
+    
+    <a class="nav-item" routerLink="/gestion/doss-art18" routerLinkActive="active">
+      <i class="fa fa-file-text" aria-hidden="true"></i>
+      Doss Art 18
+    </a>
+
+
+    <a class="nav-item" routerLink="/historique-audit" routerLinkActive="active">
+    <i class="fa fa-clipboard" aria-hidden="true"></i>
+    Historique modifications
+  </a>
+
+  <a class="nav-item" routerLink="/sinistres" routerLinkActive="active">
+  <i class="fa fa-file-text-o" aria-hidden="true"></i>
+  Données sinistres
+  <span class="nav-badge">IPP</span>
+</a>
+<a class="nav-item" routerLink="/sinistres/dashboard" routerLinkActive="active">
+  <i class="fa fa-dashboard" aria-hidden="true"></i>
+  Dashboard sinistres
+  <span class="nav-badge">📊</span>
+</a>
+
+  <a class="nav-item" routerLink="/alertes" routerLinkActive="active">
+    <i class="fa fa-bell" aria-hidden="true"></i>
+    Notifications
+    <span class="nav-badge" *ngIf="nonLuesCount > 0">{{ nonLuesCount }}</span>
+  </a>
+
+    <!-- ============================================================ -->
+    <!-- ESTIMATEUR IPP -->
+    <!-- ============================================================ -->
+    <div class="nav-label">📊 Estimateur IPP</div>
+    <a class="nav-item" routerLink="/estimation" routerLinkActive="active">
+      <i class="fa fa-calculator" aria-hidden="true"></i>
+      Estimation IPP
+    </a>
+    <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+      <i class="fa fa-bar-chart" aria-hidden="true"></i>
+      Dashboard
+    </a>
+    <a class="nav-item" routerLink="/dossiers" routerLinkActive="active">
+      <i class="fa fa-folder-open" aria-hidden="true"></i>
+      Dossiers IPP
+    </a>
+
+    <!-- ============================================================ -->
+    <!-- ANALYSE -->
+    <!-- ============================================================ -->
+    <div class="nav-label">📈 Analyse</div>
+    <a class="nav-item" routerLink="/historique" routerLinkActive="active">
+      <i class="fa fa-history" aria-hidden="true"></i>
+      Historique
+    </a>
+    <a class="nav-item" routerLink="/base-lesions" routerLinkActive="active">
+      <i class="fa fa-database" aria-hidden="true"></i>
+      Base lésions
+    </a>
+  </div>
+
+   <!-- Footer Sidebar avec Profil -->
+  <div class="sidebar-footer">
+
+    <div *ngIf="isAdmin" class="nav-section">
+  <div class="nav-label">⚙️ Administration</div>
+   <a class="nav-item" routerLink="/admin/dashboard" routerLinkActive="active">
+    <i class="fa fa-dashboard" aria-hidden="true"></i>
+    Dashboard
+  </a>
+  <a class="nav-item" routerLink="/admin/utilisateurs" routerLinkActive="active">
+    <i class="fa fa-users" aria-hidden="true"></i>
+    Gestion des utilisateurs
+  </a>
+</div>
+    
+    <!-- ✅ AJOUTER LE PROFIL ICI -->
+    <a routerLink="/profil" class="nav-item" routerLinkActive="active">
+      <i class="fa fa-user-circle" aria-hidden="true"></i>
+      <span>Mon profil</span>
+    </a>
+    <a (click)="logout()" class="nav-item logout">
+      <i class="fa fa-sign-out" aria-hidden="true"></i>
+      <span>Déconnexion</span>
+    </a>
+  </div>
+
+
+  <div class="sidebar-footer">
+    <span>Dept. Bureau Corporel</span>
+    <span class="version">v2.0</span>
+  </div>
+</div>

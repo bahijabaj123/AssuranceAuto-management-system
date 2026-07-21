@@ -1,0 +1,100 @@
+<div class="detail-container">
+  <div class="detail-header">
+    <button class="btn-back" (click)="retourner()">
+      <i class="fa fa-arrow-left" aria-hidden="true"></i>
+      Retour
+    </button>
+    <h1>📋 Détails du dossier</h1>
+    <span class="dossier-id">{{ dossierId }}</span>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des détails...</p>
+  </div>
+
+  <div *ngIf="!isLoading && dossier" class="detail-content">
+    <div class="detail-summary">
+      <div class="summary-left">
+        <div class="statut-badge" [class]="getStatutClass(dossier.statut)">
+          {{ dossier.statut }}
+        </div>
+        <span class="taux-ipp">{{ dossier.tauxIpp }}%</span>
+        <span class="taux-label">Taux IPP</span>
+      </div>
+      <div class="summary-right">
+        <div class="info-item">
+          <span class="label">Création</span>
+          <span class="value">{{ dossier.dateCreation }}</span>
+        </div>
+        <div class="info-item" *ngIf="dossier.dateCloture">
+          <span class="label">Clôture</span>
+          <span class="value">{{ dossier.dateCloture }}</span>
+        </div>
+        <div class="info-item" *ngIf="!dossier.dateCloture">
+          <span class="label">Statut</span>
+          <span class="value warning">En cours</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-col">
+        <div class="detail-card">
+          <h3><i class="fa fa-calendar" aria-hidden="true"></i> Informations médicales</h3>
+          <div class="detail-row">
+            <span class="label">Jours d'ITT</span>
+            <span class="value">{{ dossier.nbJours }} jours</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Lésions</span>
+            <div class="lesions-list">
+              <span *ngFor="let code of dossier.codeLesions" class="lesion-tag">
+                <span class="code">{{ code }}</span>
+                {{ getLesionLabel(code) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <h3><i class="fa fa-user" aria-hidden="true"></i> Responsable</h3>
+          <div class="detail-row">
+            <span class="label">Gestionnaire</span>
+            <span class="value">{{ dossier.responsable }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-col">
+        <div class="detail-card">
+          <h3><i class="fa fa-money" aria-hidden="true"></i> Indemnisation</h3>
+          <div class="detail-row">
+            <span class="label">Montant</span>
+            <span class="value highlight">{{ dossier.indemnite > 0 ? (dossier.indemnite | number) + ' DT' : 'Non défini' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Taux IPP</span>
+            <span class="value">{{ dossier.tauxIpp }}%</span>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <h3><i class="fa fa-comment" aria-hidden="true"></i> Observations</h3>
+          <p class="observations">{{ dossier.observations }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-actions">
+      <button class="btn-primary" (click)="retourner()">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        Retour à l'estimation
+      </button>
+      <button class="btn-export-pdf" (click)="exporterPDF()" *ngIf="dossier">
+        <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+        Exporter en PDF
+      </button>
+    </div>
+  </div>
+</div>

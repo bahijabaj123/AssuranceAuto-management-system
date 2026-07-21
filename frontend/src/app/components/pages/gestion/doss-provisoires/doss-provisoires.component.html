@@ -1,0 +1,113 @@
+<!-- src/app/components/pages/gestion/doss-provisoires/doss-provisoires.component.html -->
+<div class="gestion-container">
+  <div class="page-header">
+    <div class="header-left">
+      <h1><i class="fa fa-file-o" aria-hidden="true"></i> Dossiers provisoires</h1>
+      <p class="subtitle">Gestion des dossiers provisoires — <span class="count">{{ filteredDossiers.length }} dossiers</span></p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" [routerLink]="['/gestion/formulaire/doss-provisoires']">
+        <i class="fa fa-plus" aria-hidden="true"></i> Nouveau dossier provisoire
+      </button>
+      <button class="btn-secondary" (click)="exporterExcel()">
+        <i class="fa fa-file-excel-o" aria-hidden="true"></i> Exporter Excel
+      </button>
+      <button class="btn-secondary" (click)="chargerDossiers()">
+        <i class="fa fa-refresh" aria-hidden="true"></i> Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- FILTRES -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label><i class="fa fa-search" aria-hidden="true"></i> Rechercher</label>
+        <input 
+          type="text" 
+          class="filter-input" 
+          [(ngModel)]="search" 
+          (ngModelChange)="applyFilters()" 
+          placeholder="N° PROV, N° sinistre, tiers, avocat..."
+        />
+      </div>
+      <div class="filter-group">
+        <label>Région / Tribunal</label>
+        <select class="filter-select" [(ngModel)]="regionFiltre" (ngModelChange)="applyFilters()">
+          <option value="">Tous</option>
+          <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+      <div class="filter-group actions">
+        <button class="btn-reset" (click)="resetFilters()">
+          <i class="fa fa-refresh" aria-hidden="true"></i> Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des dossiers...</p>
+  </div>
+
+  <!-- TABLEAU -->
+  <div *ngIf="!isLoading">
+    <div *ngIf="filteredDossiers.length === 0" class="empty-state">
+      <i class="fa fa-inbox" aria-hidden="true"></i>
+      <p>Aucun dossier provisoire trouvé</p>
+    </div>
+
+    <div *ngIf="filteredDossiers.length > 0" class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>N° PROV</th>
+            <th>Affaire</th>
+            <th>Nature</th>
+            <th>Tiers</th>
+            <th>1ère Audience</th>
+            <th>Région/Tribunal</th>
+            <th>Avocat</th>
+            <th>N° Sinistre</th>
+            <th>Observation</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of paginatedDossiers" (click)="goToEdit(d.id)" class="clickable-row">
+            <td><span class="num-dos">{{ d.numProv }}</span></td>
+            <td>{{ d.affaire || '—' }}</td>
+            <td><span class="badge">{{ d.nature || '—' }}</span></td>
+            <td>{{ d.tiers || '—' }}</td>
+            <td>{{ d.date | date:'dd/MM/yyyy' }}</td>
+            <td><span class="region-tag">{{ d.regionTrib || '—' }}</span></td>
+            <td>{{ d.avocat || '—' }}</td>
+            <td>{{ d.numSinistre || '—' }}</td>
+            <td>{{ d.observation || '—' }}</td>
+            <td class="actions">
+              <button class="btn-edit" title="Modifier" (click)="goToEdit(d.id); $event.stopPropagation()">
+                <i class="fa fa-pencil" aria-hidden="true"></i>
+              </button>
+              <button class="btn-delete" title="Supprimer" (click)="supprimer(d.id, $event)">
+                <i class="fa fa-trash-o" aria-hidden="true"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div *ngIf="filteredDossiers.length > itemsPerPage" class="pagination">
+      <button class="page-btn" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+      </button>
+      <span class="page-info">Page {{ currentPage }} / {{ totalPages }}</span>
+      <button class="page-btn" (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</div>

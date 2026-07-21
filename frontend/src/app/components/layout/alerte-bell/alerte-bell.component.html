@@ -1,0 +1,56 @@
+<div class="alerte-bell-container" (click)="toggleDropdown()">
+  <div class="alerte-bell">
+    <i class="fa fa-bell" aria-hidden="true"></i>
+    <span class="badge" *ngIf="nonLuesCount > 0">{{ nonLuesCount }}</span>
+  </div>
+  
+  <!-- Dropdown -->
+  <div class="alerte-dropdown" *ngIf="showDropdown" (click)="$event.stopPropagation()">
+    <div class="dropdown-header">
+      <span>🔔 Notifications</span>
+      <button *ngIf="nonLuesCount > 0" (click)="marquerToutLu()" class="btn-mark-all">
+        Tout marquer comme lu
+      </button>
+    </div>
+    
+    <div class="dropdown-body">
+      <div *ngIf="alertes.length === 0" class="empty-alertes">
+        <i class="fa fa-check-circle" aria-hidden="true"></i>
+        <span>Aucune notification</span>
+      </div>
+      
+      <!-- ✅ Chaque alerte est cliquable -->
+      <div *ngFor="let alerte of alertes" 
+           class="alerte-item" 
+           [class.non-lue]="!alerte.notificationVue"
+           (click)="onAlerteClick(alerte)">
+        
+        <div class="alerte-icon" [class.civ]="alerte.nature === 'CIV'" [class.corr]="alerte.nature === 'CORR'">
+          {{ alerte.nature === 'CIV' ? '⚖️' : '🔴' }}
+        </div>
+        
+        <div class="alerte-content">
+          <!-- ✅ Numéro de dossier plus visible -->
+          <div class="alerte-title">
+            <span class="dossier-num">📋 {{ alerte.numDos }}</span>
+            <span class="nature-badge" [class.civ]="alerte.nature === 'CIV'" [class.corr]="alerte.nature === 'CORR'">
+              {{ alerte.nature }}
+            </span>
+          </div>
+          <div class="alerte-message">{{ alerte.message }}</div>
+          <div class="alerte-date">{{ formatDate(alerte.dateAlerte) }}</div>
+        </div>
+        
+        <div class="alerte-status" *ngIf="!alerte.notificationVue">
+          <span class="dot"></span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="dropdown-footer">
+      <a (click)="showDropdown = false; $event.stopPropagation()" routerLink="/alertes" class="btn-view-all">
+        📊 Voir toutes les notifications
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,64 @@
+<div class="tiers-section">
+  <div class="tiers-header">
+    <h4><i class="fa fa-users" aria-hidden="true"></i> Tiers ({{ tiers.length }})</h4>
+    <div class="tiers-stats">
+      <span class="stat-badge">
+        <i class="fa fa-percent" aria-hidden="true"></i>
+        IPP total: {{ totalIPP.toFixed(2) }}%
+      </span>
+      <span class="stat-badge">
+        <i class="fa fa-money" aria-hidden="true"></i>
+        Règlements: {{ totalReglements.toFixed(2) }} DT
+      </span>
+      <span class="stat-badge">
+        <i class="fa fa-calculator" aria-hidden="true"></i>
+        Moy. IPP: {{ moyenneIPP.toFixed(2) }}%
+      </span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-small">
+    <div class="spinner-small"></div>
+    <span>Chargement des tiers...</span>
+  </div>
+
+  <!-- Liste -->
+  <div *ngIf="!isLoading">
+    <div *ngIf="tiers.length === 0" class="empty-tiers">
+      <i class="fa fa-user-plus" aria-hidden="true"></i>
+      <p>Aucun tiers pour ce sinistre</p>
+    </div>
+
+    <div *ngFor="let t of tiers" class="tiers-item">
+      <div class="tiers-info">
+        <div class="tiers-nom">
+          <i class="fa fa-user" aria-hidden="true"></i>
+          <strong>{{ t.nomTiers }}</strong>
+        </div>
+        <div class="tiers-donnees">
+          <span class="donnee">
+            <i class="fa fa-percent" aria-hidden="true"></i>
+            IPP: <strong>{{ t.ipp || 0 }}%</strong>
+          </span>
+          <span class="donnee">
+            <i class="fa fa-clock-o" aria-hidden="true"></i>
+            Jours: <strong>{{ t.nbrJrs || 0 }}</strong>
+          </span>
+          <span class="donnee">
+            <i class="fa fa-money" aria-hidden="true"></i>
+            Règlements: <strong>{{ (t.reglements || 0) | number:'1.2-2' }} DT</strong>
+          </span>
+        </div>
+      </div>
+      <div class="tiers-actions">
+        <button class="btn-edit" (click)="onEdit(t)" title="Modifier">
+          <i class="fa fa-pencil" aria-hidden="true"></i>
+        </button>
+        <button class="btn-delete" (click)="onDelete(t.id)" title="Supprimer">
+          <i class="fa fa-trash" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

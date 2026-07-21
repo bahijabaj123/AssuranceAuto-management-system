@@ -1,0 +1,93 @@
+<div class="estimation-container">
+  <!-- Card : Informations du dossier -->
+  <div class="card">
+    <div class="card-header">
+      <i class="fa fa-file-text-o" aria-hidden="true"></i>
+      <span class="card-title">Informations du dossier</span>
+    </div>
+
+    <!-- ✅ AJOUTER formGroup ICI -->
+    <form [formGroup]="formulaire">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Numéro du dossier</label>
+          <input
+            type="text"
+            class="form-input"
+            formControlName="numDossier"
+            placeholder="ex: D-2024-0412"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nombre de jours d'ITT</label>
+          <input
+            type="number"
+            class="form-input"
+            formControlName="nbJours"
+            placeholder="ex: 45"
+            min="1"
+            max="365"
+            [class.invalid]="formulaire.get('nbJours')?.invalid && formulaire.get('nbJours')?.touched"
+          />
+          <small class="error" *ngIf="formulaire.get('nbJours')?.invalid && formulaire.get('nbJours')?.touched">
+            Veuillez saisir un nombre entre 1 et 365
+          </small>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Card : Sélection des lésions -->
+  <div class="card">
+    <div class="card-header">
+      <i class="fa fa-stethoscope" aria-hidden="true"></i>
+      <span class="card-title">Sélection des lésions</span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Lésions sélectionnées</label>
+      <div class="selected-tags">
+        <ng-container *ngIf="selectedCodes.length === 0">
+          <span class="placeholder-text">Aucune lésion sélectionnée</span>
+        </ng-container>
+        <span class="tag" *ngFor="let code of selectedCodes">
+          {{ code }}
+          <span class="tag-remove" (click)="removeLesion(code)">×</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-input"
+        placeholder="Rechercher une lésion..."
+        [(ngModel)]="searchFilter"
+        [ngModelOptions]="{ standalone: true }"
+      />
+    </div>
+
+    <div class="lesions-grid">
+      <div
+        class="lesion-chip"
+        *ngFor="let lesion of filteredLesions"
+        [class.selected]="isSelected(lesion.code)"
+        (click)="toggleLesion(lesion.code)"
+      >
+        <span class="chip-code">{{ lesion.code }}</span>
+        <span class="chip-label">{{ lesion.libelle }}</span>
+        <i class="fa fa-check" *ngIf="isSelected(lesion.code)" aria-hidden="true"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bouton -->
+  <button
+    class="btn-estimate"
+    (click)="onSubmit()"
+    [disabled]="formulaire.invalid || selectedCodes.length === 0 || isLoading"
+  >
+    <i class="fa fa-cpu" aria-hidden="true"></i>
+    {{ isLoading ? '⏳ Estimation en cours...' : '🚀 Lancer l\'estimation IPP' }}
+  </button>
+</div>

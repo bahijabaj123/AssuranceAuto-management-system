@@ -1,0 +1,105 @@
+<!-- src/app/components/pages/alertes/liste-alertes/liste-alertes.component.html -->
+<div class="alertes-container">
+  
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1><i class="fa fa-bell" aria-hidden="true"></i> Notifications</h1>
+      <p class="subtitle">
+        Alertes et rappels importants — 
+        <span class="count">{{ filteredAlertes.length }} notifications</span>
+        <span *ngIf="nonLuesCount > 0" class="badge-non-lues">{{ nonLuesCount }} non lues</span>
+      </p>
+    </div>
+    <div class="header-actions">
+      <button *ngIf="nonLuesCount > 0" class="btn-primary" (click)="marquerToutLu()">
+        <i class="fa fa-check-circle" aria-hidden="true"></i> Tout marquer comme lu
+      </button>
+      <button class="btn-secondary" (click)="chargerAlertes()">
+        <i class="fa fa-refresh" aria-hidden="true"></i> Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- FILTRES -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label><i class="fa fa-search" aria-hidden="true"></i> Rechercher</label>
+        <input 
+          type="text" 
+          class="filter-input" 
+          [(ngModel)]="search" 
+          (ngModelChange)="applyFilters()" 
+          placeholder="N° DOS, message..."
+        />
+      </div>
+      <div class="filter-group">
+        <label>Nature</label>
+        <select class="filter-select" [(ngModel)]="natureFiltre" (ngModelChange)="applyFilters()">
+          <option value="">Toutes</option>
+          <option value="CIV">⚖️ Civil</option>
+          <option value="CORR">🔴 Correctionnel</option>
+        </select>
+      </div>
+      <div class="filter-group actions">
+        <button class="btn-reset" (click)="resetFilters()">
+          <i class="fa fa-refresh" aria-hidden="true"></i> Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des notifications...</p>
+  </div>
+
+  <!-- LISTE -->
+  <div *ngIf="!isLoading">
+    <!-- Aucune notification -->
+    <div *ngIf="filteredAlertes.length === 0" class="empty-state">
+      <i class="fa fa-check-circle" aria-hidden="true"></i>
+      <p>Aucune notification</p>
+      <p class="empty-sub">Vous êtes à jour !</p>
+    </div>
+
+    <!-- Liste des notifications -->
+    <div *ngFor="let alerte of filteredAlertes" 
+         class="alerte-card" 
+         [class.non-lue]="!alerte.notificationVue"
+         (click)="goToDossier(alerte.numDos)">
+      
+      <div class="alerte-card-left">
+        <div class="alerte-icon" [style.background]="getNatureColor(alerte.nature)">
+          {{ alerte.nature === 'CIV' ? '⚖️' : '🔴' }}
+        </div>
+      </div>
+      
+      <div class="alerte-card-body">
+        <div class="alerte-card-header">
+          <span class="alerte-num">{{ alerte.numDos }}</span>
+          <span class="alerte-nature" [style.color]="getNatureColor(alerte.nature)">
+            {{ getNatureLabel(alerte.nature) }}
+          </span>
+          <span class="alerte-date">{{ formatDate(alerte.dateAlerte) }}</span>
+        </div>
+        <div class="alerte-message">{{ alerte.message }}</div>
+        <div class="alerte-footer">
+          <span *ngIf="alerte.emailEnvoye" class="badge-email">
+            <i class="fa fa-envelope" aria-hidden="true"></i> Email envoyé
+          </span>
+          <span *ngIf="!alerte.notificationVue" class="badge-non-lue">Nouveau</span>
+          <button *ngIf="!alerte.notificationVue" class="btn-mark-read" (click)="marquerCommeLue(alerte); $event.stopPropagation()">
+            <i class="fa fa-check" aria-hidden="true"></i> Marquer comme lu
+          </button>
+          <button class="btn-view" (click)="goToDossier(alerte.numDos); $event.stopPropagation()">
+            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

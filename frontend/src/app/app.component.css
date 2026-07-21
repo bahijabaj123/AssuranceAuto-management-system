@@ -1,0 +1,92 @@
+/* src/app/app.component.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+/* ✅ Layout principal en flex */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+/* ✅ Sidebar - fixe à gauche */
+app-sidebar {
+  width: 250px;
+  min-height: 100vh;
+  background: #0a2540;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+/* ✅ Contenu principal - prend le reste de l'espace */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f5f7fa;
+  overflow-x: hidden;
+}
+
+/* ✅ Header */
+app-header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: #ffffff;
+  border-bottom: 1px solid #e6eaef;
+  flex-shrink: 0;
+}
+
+/* ✅ Contenu - prend toute la hauteur restante */
+.content-wrapper {
+  flex: 1;
+  padding: 24px;
+  background: #f5f7fa;
+}
+
+/* ✅ Pour que les pages prennent toute la hauteur */
+.content-wrapper > * {
+  height: 100%;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  app-sidebar {
+    width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  
+  app-sidebar {
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    position: relative;
+    position: sticky;
+    top: 0;
+  }
+  
+  .main-content {
+    min-height: auto;
+  }
+  
+  .content-wrapper {
+    padding: 16px;
+  }
+}

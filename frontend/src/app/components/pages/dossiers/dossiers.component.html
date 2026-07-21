@@ -1,0 +1,180 @@
+<div class="dossiers-container">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <h1><i class="fa fa-folder-open" aria-hidden="true"></i> Gestion des dossiers</h1>
+    <p class="subtitle">Consultez et filtrez l'ensemble des dossiers</p>
+  </div>
+
+  <!-- ── BANDEAU FILTRE ACTIF (depuis dashboard) ── -->
+  <div *ngIf="filtreActif" class="filtre-actif-bar">
+    <i class="fa fa-filter" aria-hidden="true"></i>
+    <span>Filtre actif : <strong>{{ filtreActif }}</strong></span>
+    <button class="btn-clear-filtre" (click)="resetFilters()">
+      <i class="fa fa-times" aria-hidden="true"></i>
+      Effacer
+    </button>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label>Rechercher</label>
+        <input
+          type="text"
+          class="filter-input"
+          [(ngModel)]="filters.search"
+          (ngModelChange)="applyFilters()"
+          placeholder="Numéro de dossier..."
+        />
+      </div>
+
+      <div class="filter-group">
+        <label>Statut</label>
+        <select class="filter-select" [(ngModel)]="filters.statut" (ngModelChange)="applyFilters()">
+          <option value="">Tous</option>
+          <option *ngFor="let opt of statutOptions" [value]="opt">{{ opt }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Lésion</label>
+        <select class="filter-select" [(ngModel)]="filters.lesion" (ngModelChange)="applyFilters()">
+          <option value="">Toutes</option>
+          <option *ngFor="let l of lesionOptions" [value]="l">{{ getLesionLabel(l) }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filters-row">
+      <div class="filter-group small">
+        <label>IPP min</label>
+        <input type="number" class="filter-input"
+          [(ngModel)]="filters.tauxMin" (ngModelChange)="applyFilters()"
+          placeholder="0" min="0" max="100"/>
+      </div>
+
+      <div class="filter-group small">
+        <label>IPP max</label>
+        <input type="number" class="filter-input"
+          [(ngModel)]="filters.tauxMax" (ngModelChange)="applyFilters()"
+          placeholder="100" min="0" max="100"/>
+      </div>
+
+      <div class="filter-group">
+        <label>Date début</label>
+        <input type="date" class="filter-input"
+          [(ngModel)]="filters.dateDebut" (ngModelChange)="applyFilters()"/>
+      </div>
+
+      <div class="filter-group">
+        <label>Date fin</label>
+        <input type="date" class="filter-input"
+          [(ngModel)]="filters.dateFin" (ngModelChange)="applyFilters()"/>
+      </div>
+
+      <div class="filter-group actions">
+        <button class="btn-reset" (click)="resetFilters()">
+          <i class="fa fa-refresh" aria-hidden="true"></i>
+          Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Résultats -->
+  <div class="results-section">
+    <div class="results-header">
+      <span class="count">{{ filteredDossiers.length }} dossier(s) trouvé(s)</span>
+      <div class="export-actions">
+        <button class="btn-export-excel" (click)="exporterExcel()" *ngIf="filteredDossiers.length > 0">
+          <i class="fa fa-file-excel-o" aria-hidden="true"></i>
+          Exporter Excel
+        </button>
+        <span class="hint" *ngIf="filteredDossiers.length > 0">
+          Cliquez sur une ligne pour voir les détails
+        </span>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement des dossiers...</p>
+    </div>
+
+    <div *ngIf="!isLoading">
+
+      <!-- Empty state -->
+      <div *ngIf="filteredDossiers.length === 0" class="empty-state">
+        <i class="fa fa-inbox" aria-hidden="true"></i>
+        <p>Aucun dossier ne correspond aux critères</p>
+        <button class="btn-reset" (click)="resetFilters()">Réinitialiser les filtres</button>
+      </div>
+
+      <!-- ── CORRECTION BUG 1 : structure <tr><td> correcte ── -->
+      <div *ngIf="filteredDossiers.length > 0" class="table-wrapper">
+        <table class="dossiers-table">
+          <thead>
+            <tr>
+              <th>Dossier</th>
+              <th>Jours ITT</th>
+              <th>Lésions</th>
+              <th>Taux IPP</th>
+              <th>Statut</th>
+              <th>Indemnité</th>
+              <th>Création</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let dossier of paginatedDossiers"
+              (click)="goToDossierDetail(dossier.id)"
+              class="clickable-row"
+            >
+              <td><strong>{{ dossier.numero || dossier.id }}</strong></td>
+
+              <td>{{ dossier.nbJours }}j</td>
+
+              <!-- ── CORRECTION BUG 1 : </td> bien fermé après les lésions ── -->
+              <td>
+                <span class="lesion-tag" *ngFor="let code of dossier.codeLesions">
+                  {{ code }}
+                </span>
+              </td>
+
+              <td class="taux-cell">{{ dossier.tauxIpp }}%</td>
+
+              <td>
+                <span class="statut-badge" [class]="getStatutClass(dossier.statut)">
+                  {{ dossier.statut }}
+                </span>
+              </td>
+
+              <td>{{ dossier.indemnite > 0 ? (dossier.indemnite | number) + ' DT' : '—' }}</td>
+
+              <td>{{ dossier.dateCreation }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="filteredDossiers.length > itemsPerPage" class="pagination">
+        <button class="page-btn"
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1">
+          <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        </button>
+        <span class="page-info">Page {{ currentPage }} / {{ totalPages }}</span>
+        <button class="page-btn"
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages">
+          <i class="fa fa-chevron-right" aria-hidden="true"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

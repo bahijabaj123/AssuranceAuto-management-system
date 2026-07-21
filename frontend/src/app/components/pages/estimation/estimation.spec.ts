@@ -1,0 +1,22 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { Estimation } from './estimation';
+
+describe('Estimation', () => {
+  let component: Estimation;
+  let fixture: ComponentFixture<Estimation>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Estimation],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(Estimation);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});

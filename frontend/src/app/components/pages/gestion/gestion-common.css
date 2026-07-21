@@ -1,0 +1,113 @@
+/* ============================================================
+   STYLES COMMUNS POUR LA GESTION
+   ============================================================ */
+
+/* ── Dashboard Gestion ── */
+.dash-header h1 {
+  color: var(--carte-navy);
+}
+.kpi-item {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid var(--color-border-tertiary);
+}
+.kpi-item:hover {
+  border-color: var(--carte-cyan);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+.kpi-number {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--carte-navy);
+}
+.chart-fill {
+  height: 100%;
+  border-radius: 20px;
+}
+.chart-value {
+  font-weight: 600;
+  color: var(--carte-navy);
+}
+.card-id {
+  font-weight: 700;
+  color: var(--carte-navy);
+}
+.modern-header {
+  background: linear-gradient(135deg, #0a2540 0%, #1a4b6b 100%);
+  border-radius: 16px;
+  padding: 24px 28px;
+  color: #fff;
+}
+.modern-header h1 {
+  color: #fff !important;
+}
+.header-sub .highlight {
+  color: var(--carte-cyan);
+  font-weight: 600;
+}
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+}
+.stat-label {
+  font-size: 12px;
+  opacity: 0.6;
+  color: #fff;
+}
+.judicial-header {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 24px;
+  border: 1px solid var(--color-border-tertiary);
+}
+.timeline-item {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  border: 1px solid var(--color-border-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.timeline-item:hover {
+  border-color: var(--carte-cyan);
+}
+.timeline-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--carte-navy);
+}
+.dossier-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--color-border-tertiary);
+}
+.dossier-card:hover {
+  border-color: var(--carte-cyan);
+}
+.card-header {
+  background: var(--color-background-secondary);
+  border-bottom: 1px solid var(--color-border-tertiary);
+}
+.card-status.pending {
+  background: #fff3e0;
+  color: #e65100;
+}
+.card-status.validated {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.form-container {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid var(--color-border-tertiary);
+}
+.form-container h2 {
+  color: var(--carte-navy);
+}

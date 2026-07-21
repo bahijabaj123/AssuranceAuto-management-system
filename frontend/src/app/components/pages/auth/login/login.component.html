@@ -1,0 +1,83 @@
+<!-- src/app/components/pages/auth/login/login.component.html -->
+<div class="login-card">
+  
+  <div class="login-header">
+    <h1>Bienvenue</h1>
+    <p class="subtitle">Connectez-vous pour accéder à votre espace</p>
+  </div>
+
+  <!-- ✅ Message d'erreur -->
+  <div *ngIf="showError" class="error-alert">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <form (ngSubmit)="onLogin()" #loginForm="ngForm" class="login-form">
+    
+    <div class="form-group">
+      <label for="email">ADRESSE EMAIL</label>
+      <input
+        id="email"
+        type="email"
+        class="form-control"
+        [(ngModel)]="email"
+        name="email"
+        required
+        [class.error]="showError"
+        #emailInput="ngModel"
+      />
+      <div *ngIf="emailInput.invalid && emailInput.touched" class="field-error">
+        Veuillez entrer un email valide
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">MOT DE PASSE</label>
+      <div class="password-wrapper">
+        <input
+          id="password"
+          [type]="showPassword ? 'text' : 'password'"
+          class="form-control"
+          [(ngModel)]="password"
+          name="password"
+          required
+          minlength="6"
+          [class.error]="showError"
+          #passwordInput="ngModel"
+        />
+        <button type="button" class="toggle-password" (click)="togglePassword()" tabindex="-1">
+          <i class="fa" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div *ngIf="passwordInput.invalid && passwordInput.touched" class="field-error">
+        Le mot de passe doit contenir au moins 6 caractères
+      </div>
+    </div>
+
+    <div class="form-options">
+      <label class="remember-me">
+        <input type="checkbox" /> Se souvenir de moi
+      </label>
+      <a routerLink="/reset-password" class="forgot-password">Mot de passe oublié ?</a>
+    </div>
+
+    <button type="submit" class="btn-login" [disabled]="loginForm.invalid || isLoading">
+      <span *ngIf="!isLoading">Se connecter</span>
+      <span *ngIf="isLoading">
+        <i class="fa fa-spinner fa-spin" aria-hidden="true"></i> Connexion...
+      </span>
+    </button>
+
+    <div class="link-row">
+      Pas encore de compte ? <a routerLink="/register">Créer un compte</a>
+    </div>
+
+  </form>
+
+  <div class="login-footer">
+    <span class="version">Version 1.0.0</span>
+    <span class="separator">|</span>
+    <span class="copyright">© 2026 Carte Assurances</span>
+  </div>
+
+</div>

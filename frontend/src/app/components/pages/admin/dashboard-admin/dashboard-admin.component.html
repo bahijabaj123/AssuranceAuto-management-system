@@ -1,0 +1,169 @@
+<!-- src/app/components/pages/admin/dashboard-admin/dashboard-admin.component.html -->
+<div class="dashboard-admin">
+  
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1><i class="fa fa-dashboard" aria-hidden="true"></i> Tableau de bord - Administration</h1>
+      <p class="subtitle">Statistiques globales et performances des gestionnaires</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="chargerDonnees()">
+        <i class="fa fa-refresh" aria-hidden="true"></i> Actualiser
+      </button>
+      <button class="btn-sync" (click)="synchroniserTousLesDossiers()">
+    <i class="fa fa-refresh" aria-hidden="true"></i> Synchroniser IPP
+  </button>
+    </div>
+  </div>
+
+  <!-- ❌ SUPPRIMER CES LIGNES -->
+  <!-- <div *ngIf="calculMessage" class="alert-message success">
+    <i class="fa fa-check-circle" aria-hidden="true"></i> {{ calculMessage }}
+  </div> -->
+
+  <!-- ACCÈS REFUSÉ -->
+  <div *ngIf="!isAdmin" class="access-denied">
+    <i class="fa fa-lock" aria-hidden="true"></i>
+    <h2>Accès réservé aux administrateurs</h2>
+    <p>Vous n'avez pas les droits nécessaires pour accéder à cette page.</p>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="isLoading && isAdmin" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des statistiques...</p>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div *ngIf="!isLoading && isAdmin">
+
+    <!-- ===== KPI CARDS ===== -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon blue">
+          <i class="fa fa-file-text-o" aria-hidden="true"></i>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ statsGlobales.totalDossiers || 0 }}</span>
+          <span class="kpi-label">Total dossiers</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon green">
+          <i class="fa fa-users" aria-hidden="true"></i>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ statsGlobales.totalGestionnaires || 0 }}</span>
+          <span class="kpi-label">Gestionnaires</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon orange">
+          <i class="fa fa-money" aria-hidden="true"></i>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ (statsGlobales.totalReglements || 0) | number:'1.0-0' }} DT</span>
+          <span class="kpi-label">Règlements total</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon purple">
+          <i class="fa fa-percent" aria-hidden="true"></i>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ statsGlobales.ippMoyenGlobal || 0 }}%</span>
+          <span class="kpi-label">IPP moyen global</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== GRAPHIQUES ===== -->
+    <div class="charts-grid">
+
+      <!-- Graphique 1 : Dossiers par gestionnaire -->
+      <div class="chart-card full-width">
+        <div class="chart-header">
+          <h3><i class="fa fa-users" aria-hidden="true"></i> Dossiers par gestionnaire</h3>
+          <span class="chart-badge">Performance</span>
+        </div>
+        <div class="chart-body">
+          <canvas #chartGestionnaires></canvas>
+        </div>
+      </div>
+
+      <!-- Graphique 2 : Évolution par année -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Évolution des dossiers</h3>
+          <span class="chart-badge">Par année</span>
+        </div>
+        <div class="chart-body">
+          <canvas #chartEvolution></canvas>
+        </div>
+      </div>
+
+      <!-- Graphique 3 : Répartition par nature -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3><i class="fa fa-pie-chart" aria-hidden="true"></i> Répartition par nature</h3>
+          <span class="chart-badge">CIV / CORR / etc.</span>
+        </div>
+        <div class="chart-body">
+          <canvas #chartNature></canvas>
+        </div>
+      </div>
+
+      <!-- Graphique 4 : Règlements par année -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3><i class="fa fa-bar-chart" aria-hidden="true"></i> Règlements par année</h3>
+          <span class="chart-badge">En milliers DT</span>
+        </div>
+        <div class="chart-body">
+          <canvas #chartReglements></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== TABLEAU DES GESTIONNAIRES ===== -->
+    <div class="table-section">
+      <div class="table-header">
+        <h3><i class="fa fa-table" aria-hidden="true"></i> Détail par gestionnaire</h3>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Gestionnaire</th>
+              <th>Email</th>
+              <th>Dossiers</th>
+              <th>IPP moyen</th>
+              <th>NBR JRS moyen</th>
+              <th>Règlements</th>
+              <th>Nature</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of statsGestionnaires">
+              <td><span class="user-name">{{ s.prenom }} {{ s.nom }}</span></td>
+              <td>{{ s.email }}</td>
+              <td><span class="badge-dossiers">{{ s.totalDossiers }}</span></td>
+              <td>{{ s.ippMoyen }}%</td>
+              <td>{{ s.nbrJrsMoyen }}</td>
+              <td>{{ (s.reglementsTotal || 0) | number:'1.0-0' }} DT</td>
+              <td>
+                <span *ngFor="let nature of s.natureCount | keyvalue" class="badge-nature">
+                  {{ nature.key }}: {{ nature.value }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>

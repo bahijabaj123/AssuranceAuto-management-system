@@ -1,0 +1,491 @@
+/* src/app/components/pages/gestion/etat-suivi/etat-suivi.component.css */
+
+.gestion-container {
+  padding: 24px;
+  background: linear-gradient(180deg, #f6f9ff 0%, #f8fafc 100%);
+  min-height: 100vh;
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.header-left h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: #071b4d;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-left h1 i {
+  color: #10bfe3;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.count {
+  color: #0b2f86;
+  font-weight: 800;
+}
+
+/* Buttons */
+.header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-reset,
+.page-btn {
+  border: 0;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  padding: 11px 18px;
+  background: linear-gradient(135deg, #082b7c, #174aa6);
+  color: white;
+  box-shadow: 0 8px 18px rgba(8, 43, 124, 0.22);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(8, 43, 124, 0.3);
+}
+
+.btn-secondary,
+.btn-reset {
+  padding: 11px 16px;
+  background: #eef3fb;
+  color: #334155;
+  border: 1px solid #dce6f3;
+}
+
+.btn-secondary:hover,
+.btn-reset:hover {
+  background: #e3f7fc;
+  color: #082b7c;
+  border-color: #10bfe3;
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   ✅ FILTRES AMÉLIORÉS
+   ============================================================ */
+.filters-section {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 20px 24px;
+  margin-bottom: 22px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+
+.filters-row:last-child {
+  margin-bottom: 0;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-group label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-group label i {
+  color: #10bfe3;
+  font-size: 13px;
+}
+
+.filter-input,
+.filter-select {
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid #d8e0ec;
+  background: #f8fbff;
+  color: #0f172a;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: all 0.25s ease;
+  width: 100%;
+}
+
+.filter-input:hover,
+.filter-select:hover {
+  border-color: #10bfe3;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  background: white;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+.filter-input::placeholder {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* ✅ Range inputs */
+.range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.range-input {
+  flex: 1;
+  text-align: center;
+  height: 42px;
+  padding: 0 8px;
+  border-radius: 10px;
+  border: 1.5px solid #d8e0ec;
+  background: #f8fbff;
+  color: #0f172a;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: all 0.25s ease;
+  width: 70px;
+}
+
+.range-input:hover {
+  border-color: #10bfe3;
+}
+
+.range-input:focus {
+  background: white;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+.range-input::placeholder {
+  color: #94a3b8;
+  font-size: 11px;
+  text-align: center;
+}
+
+.range-separator {
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+/* ✅ Filtre propriétaire */
+.filter-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+/* ✅ Bouton Réinitialiser */
+.filter-group.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.btn-reset {
+  height: 42px;
+  padding: 0 20px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1.5px solid #d8e0ec;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-reset:hover {
+  background: #e2e8f0;
+  border-color: #10bfe3;
+  color: #082b7c;
+}
+
+/* ✅ Responsive */
+@media (max-width: 1024px) {
+  .filters-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .filters-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .range-inputs {
+    flex-wrap: nowrap;
+  }
+  
+  .range-input {
+    width: 60px;
+  }
+  
+  .filter-group.actions {
+    justify-content: center;
+  }
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.table-wrapper {
+  background: white;
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  min-width: 1200px;
+}
+
+.data-table thead {
+  background: linear-gradient(135deg, #f8fbff, #edf5ff);
+}
+
+.data-table th {
+  padding: 14px 14px;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  text-align: left;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 12px 14px;
+  color: #0f172a;
+  border-bottom: 1px solid #edf2f7;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.data-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+  background: #f2fbff;
+  transform: scale(1.002);
+  box-shadow: inset 4px 0 0 #10bfe3;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.num-dos {
+  color: #082b7c;
+  font-weight: 700;
+}
+
+.badge,
+.region-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.badge {
+  background: #e7f0ff;
+  color: #0b3b91;
+}
+
+.region-tag {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+/* Actions */
+.actions-col {
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-edit,
+.btn-delete {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-edit {
+  color: #0b3b91;
+}
+
+.btn-edit:hover {
+  background: #e7f0ff;
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  color: #ef4444;
+}
+
+.btn-delete:hover {
+  background: #fee2e2;
+  transform: translateY(-2px);
+}
+
+/* Loading / Empty */
+.loading-state,
+.empty-state {
+  background: white;
+  border-radius: 18px;
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.empty-state i {
+  font-size: 48px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #10bfe3;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 0 6px;
+}
+
+.page-btn {
+  width: 38px;
+  height: 38px;
+  background: white;
+  color: #082b7c;
+  border: 1px solid #d8e0ec;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #082b7c;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+}
+
+/* src/app/components/pages/gestion/etat-suivi/etat-suivi.component.css */
+
+/* ✅ Ajouter à la fin du fichier */
+
+/* Filtre année */
+.filter-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+}

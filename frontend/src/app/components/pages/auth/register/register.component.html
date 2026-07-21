@@ -1,0 +1,124 @@
+<!-- src/app/components/pages/auth/register/register.component.html -->
+<div class="register-container">
+  <div class="register-card">
+
+    <div class="register-header">
+      <h1>Créer un compte</h1>
+      <p class="subtitle">Rejoignez la plateforme de gestion des dossiers</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #registerForm="ngForm" class="register-form">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nom">NOM</label>
+          <input
+            id="nom"
+            type="text"
+            class="form-control"
+            [(ngModel)]="user.nom"
+            name="nom"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="prenom">PRÉNOM</label>
+          <input
+            id="prenom"
+            type="text"
+            class="form-control"
+            [(ngModel)]="user.prenom"
+            name="prenom"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">ADRESSE EMAIL</label>
+        <input
+          id="email"
+          type="email"
+          class="form-control"
+          [(ngModel)]="user.email"
+          name="email"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label>RÔLE</label>
+        <div class="role-select">
+          <div
+            class="role-btn"
+            [class.selected]="user.role === 'GESTIONNAIRE'"
+            (click)="selectRole('GESTIONNAIRE')"
+          >
+            <i class="fa fa-user-check" aria-hidden="true"></i>
+            <span class="rl">Gestionnaire</span>
+          </div>
+          <div
+            class="role-btn"
+            [class.selected]="user.role === 'RESPONSABLE'"
+            (click)="selectRole('RESPONSABLE')"
+          >
+            <i class="fa fa-crown" aria-hidden="true"></i>
+            <span class="rl">Responsable</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">MOT DE PASSE</label>
+        <div class="password-wrapper">
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            class="form-control"
+            [(ngModel)]="user.password"
+            name="password"
+            required
+            minlength="8"
+          />
+          <button type="button" class="toggle-password" (click)="togglePassword()">
+            <i class="fa" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="password-strength" *ngIf="user.password">
+          <div class="strength-bar">
+            <div class="strength-fill" [style.width]="passwordStrength.width" [style.background]="passwordStrength.color"></div>
+          </div>
+          <span class="strength-label" [style.color]="passwordStrength.color">
+            {{ passwordStrength.label }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">CONFIRMER LE MOT DE PASSE</label>
+        <div class="password-wrapper">
+          <input
+            id="confirmPassword"
+            [type]="showPassword ? 'text' : 'password'"
+            class="form-control"
+            [(ngModel)]="user.confirmerMotDePasse"
+            name="confirmPassword"
+            required
+          />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-register" [disabled]="registerForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Créer mon compte</span>
+        <span *ngIf="isLoading">
+          <i class="fa fa-spinner fa-spin" aria-hidden="true"></i> Création en cours...
+        </span>
+      </button>
+
+      <div class="link-row">
+        Déjà un compte ? <a routerLink="/login">Se connecter</a>
+      </div>
+    </form>
+
+  </div>
+</div>

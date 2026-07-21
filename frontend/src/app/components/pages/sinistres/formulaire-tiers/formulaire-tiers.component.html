@@ -1,0 +1,78 @@
+<div class="tiers-form">
+  <div class="form-header">
+    <h4>{{ isEditing ? '✏️ Modifier le tiers' : '➕ Ajouter un tiers' }}</h4>
+    <button class="btn-close" (click)="onCancel()" type="button">
+      <i class="fa fa-times" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" #tiersForm="ngForm">
+    <div class="form-group">
+      <label for="nomTiers">Nom du tiers *</label>
+      <input
+        type="text"
+        id="nomTiers"
+        class="form-control"
+        [(ngModel)]="formData.nomTiers"
+        name="nomTiers"
+        required
+        placeholder="Ex: Dupont Jean"
+      />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="ipp">IPP (%)</label>
+        <input
+          type="number"
+          id="ipp"
+          class="form-control"
+          [(ngModel)]="formData.ipp"
+          name="ipp"
+          min="0"
+          max="100"
+          step="0.01"
+          placeholder="0"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="nbrJrs">Nombre de jours</label>
+        <input
+          type="number"
+          id="nbrJrs"
+          class="form-control"
+          [(ngModel)]="formData.nbrJrs"
+          name="nbrJrs"
+          min="0"
+          placeholder="0"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="reglements">Règlements (DT)</label>
+        <input
+          type="number"
+          id="reglements"
+          class="form-control"
+          [(ngModel)]="formData.reglements"
+          name="reglements"
+          min="0"
+          step="0.01"
+          placeholder="0"
+        />
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="onCancel()">
+        Annuler
+      </button>
+      <button type="submit" class="btn-submit" [disabled]="isLoading || !tiersForm.form.valid">
+        <i class="fa" [class.fa-spinner]="isLoading" [class.fa-spin]="isLoading" 
+           [class.fa-save]="!isLoading" aria-hidden="true"></i>
+        {{ isLoading ? 'Enregistrement...' : (isEditing ? 'Mettre à jour' : 'Ajouter') }}
+      </button>
+    </div>
+  </form>
+</div>

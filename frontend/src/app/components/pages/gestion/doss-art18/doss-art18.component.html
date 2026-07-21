@@ -1,0 +1,125 @@
+<!-- src/app/components/pages/gestion/doss-art18/doss-art18.component.html -->
+<div class="gestion-container">
+  <div class="page-header">
+    <div class="header-left">
+      <h1><i class="fa fa-file-text-o" aria-hidden="true"></i> Dossiers Art. 18</h1>
+      <p class="subtitle">Recours compagnies adverses — <span class="count">{{ filteredDossiers.length }} dossiers</span></p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" [routerLink]="['/gestion/formulaire-art18']">
+        <i class="fa fa-plus" aria-hidden="true"></i> Nouveau dossier Art. 18
+      </button>
+      <button class="btn-secondary" (click)="exporterExcel()">
+        <i class="fa fa-file-excel-o" aria-hidden="true"></i> Exporter Excel
+      </button>
+      <button class="btn-secondary" (click)="chargerDossiers()">
+        <i class="fa fa-refresh" aria-hidden="true"></i> Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- FILTRES -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label><i class="fa fa-search" aria-hidden="true"></i> Rechercher</label>
+        <input 
+          type="text" 
+          class="filter-input" 
+          [(ngModel)]="search" 
+          (ngModelChange)="applyFilters()" 
+          placeholder="Réf., compagnie, blessé..."
+        />
+      </div>
+      <div class="filter-group">
+        <label>Région</label>
+        <select class="filter-select" [(ngModel)]="regionFiltre" (ngModelChange)="applyFilters()">
+          <option value="">Toutes</option>
+          <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Sécurité informée</label>
+        <select class="filter-select" [(ngModel)]="secFiltre" (ngModelChange)="applyFilters()">
+          <option value="">Tous</option>
+          <option value="Oui">Oui</option>
+          <option value="Non">Non</option>
+          <option value="Pas encore">Pas encore</option>
+        </select>
+      </div>
+      <div class="filter-group actions">
+        <button class="btn-reset" (click)="resetFilters()">
+          <i class="fa fa-refresh" aria-hidden="true"></i> Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des dossiers...</p>
+  </div>
+
+  <!-- TABLEAU -->
+  <div *ngIf="!isLoading">
+    <div *ngIf="filteredDossiers.length === 0" class="empty-state">
+      <i class="fa fa-inbox" aria-hidden="true"></i>
+      <p>Aucun dossier Art. 18 trouvé</p>
+    </div>
+
+    <div *ngIf="filteredDossiers.length > 0" class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Réf.</th>
+            <th>Compagnie adverse</th>
+            <th>Région</th>
+            <th>Blessé</th>
+            <th>Date envoi lettre info</th>
+            <th>Sécurité informée</th>
+            <th>Date</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of paginatedDossiers" (click)="goToEdit(d.id)" class="clickable-row">
+            <td><span class="num-dos">{{ d.reference }}</span></td>
+            <td>{{ d.cieAdverse || '—' }}</td>
+            <td><span class="region-tag">{{ d.region || '—' }}</span></td>
+            <td>{{ d.blesse || '—' }}</td>
+            <td>{{ d.dateEnvoiLettInfo | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <span class="statut-badge"
+                    [class.statut-cloture]="d.secRecupInforme === 'Oui'"
+                    [class.statut-attente]="d.secRecupInforme === 'Non'"
+                    [class.statut-pending]="d.secRecupInforme === 'Pas encore'">
+                {{ d.secRecupInforme || 'Non' }}
+              </span>
+            </td>
+            <td>{{ d.date | date:'dd/MM/yyyy' }}</td>
+            <td class="actions">
+              <button class="btn-edit" title="Modifier" (click)="goToEdit(d.id); $event.stopPropagation()">
+                <i class="fa fa-pencil" aria-hidden="true"></i>
+              </button>
+              <button class="btn-delete" title="Supprimer" (click)="supprimer(d.id, $event)">
+                <i class="fa fa-trash-o" aria-hidden="true"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="filteredDossiers.length > itemsPerPage" class="pagination">
+      <button class="page-btn" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+      </button>
+      <span class="page-info">Page {{ currentPage }} / {{ totalPages }}</span>
+      <button class="page-btn" (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</div>

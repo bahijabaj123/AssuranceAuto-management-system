@@ -1,0 +1,115 @@
+<!-- src/app/components/pages/admin/gestion-utilisateurs/gestion-utilisateurs.component.html -->
+<div class="gestion-utilisateurs">
+  
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1><i class="fa fa-users" aria-hidden="true"></i> Gestion des utilisateurs</h1>
+      <p class="subtitle">Liste des comptes — <span class="count">{{ filteredUtilisateurs.length }} utilisateurs</span></p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="chargerUtilisateurs()">
+        <i class="fa fa-refresh" aria-hidden="true"></i> Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label><i class="fa fa-search" aria-hidden="true"></i> Rechercher</label>
+        <input 
+          type="text" 
+          class="filter-input" 
+          [(ngModel)]="search" 
+          (ngModelChange)="applyFilters()" 
+          placeholder="Nom, prénom, email..."
+        />
+      </div>
+      <div class="filter-group actions">
+        <button class="btn-reset" (click)="resetFilters()">
+          <i class="fa fa-refresh" aria-hidden="true"></i> Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des utilisateurs...</p>
+  </div>
+
+  <!-- Tableau -->
+  <div *ngIf="!isLoading">
+    <div *ngIf="filteredUtilisateurs.length === 0" class="empty-state">
+      <i class="fa fa-users" aria-hidden="true"></i>
+      <p>Aucun utilisateur trouvé</p>
+    </div>
+
+    <div *ngIf="filteredUtilisateurs.length > 0" class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Utilisateur</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Dernière connexion</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of paginatedUtilisateurs">
+            <td>
+              <div class="user-info">
+                <div class="user-avatar">{{ (u.prenom?.[0] || '') + (u.nom?.[0] || '') }}</div>
+                <div>
+                  <div class="user-name">{{ u.prenom }} {{ u.nom }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ u.email }}</td>
+            <td>
+              <span class="badge-role" [style.background]="getRoleColor(u.role)">
+                {{ getRoleLabel(u.role) }}
+              </span>
+            </td>
+            <td>{{ formatDate(u.derniereConnexion) }}</td>
+            <td class="actions">
+              <!-- ✅ Bouton Changer de rôle -->
+              <button 
+                class="btn-role" 
+                (click)="changerRole(u)" 
+                title="Changer le rôle"
+                [disabled]="u.id === currentUserId">
+                <i class="fa fa-exchange" aria-hidden="true"></i>
+              </button>
+
+              <!-- ✅ Bouton Supprimer -->
+              <button 
+                class="btn-delete" 
+                (click)="supprimer(u)" 
+                title="Supprimer"
+                [disabled]="u.id === currentUserId">
+                <i class="fa fa-trash-o" aria-hidden="true"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="filteredUtilisateurs.length > itemsPerPage" class="pagination">
+      <button class="page-btn" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+      </button>
+      <span class="page-info">Page {{ currentPage }} / {{ totalPages }}</span>
+      <button class="page-btn" (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+
+</div>

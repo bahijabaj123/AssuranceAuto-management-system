@@ -1,0 +1,141 @@
+<div class="sortjug-container">
+  <div class="judicial-header">
+    <div class="header-left">
+      <h1><i class="fa fa-gavel"></i> Sort Jug</h1>
+      <p class="header-sub">
+        Suivi des jugements et significations 
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-judge" routerLink="/gestion/formulaire-sort-jug">
+        <i class="fa fa-plus"></i> Ajouter
+      </button>
+      <button class="btn-secondary" (click)="exporterExcel()">
+        <i class="fa fa-file-excel-o"></i> Exporter
+      </button>
+      <button class="btn-secondary" (click)="chargerDossiers()">
+        <i class="fa fa-refresh"></i> Actualiser
+      </button>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon"><i class="fa fa-calendar"></i></div>
+      <div>
+        <span class="kpi-label">Dernière signification</span>
+        <span class="kpi-value">{{ dernierJugement?.dateSignification || '-' }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon"><i class="fa fa-balance-scale"></i></div>
+      <div>
+        <span class="kpi-label">En appel</span>
+        <span class="kpi-value">{{ jugementsEnAppel }}</span>
+      </div>
+    </div>
+
+  
+
+    <div class="kpi-card">
+      <div class="kpi-icon"><i class="fa fa-clock-o"></i></div>
+      <div>
+        <span class="kpi-label">À régler</span>
+        <span class="kpi-value">{{ jugementsARegler }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-advanced">
+    <input
+      type="text"
+      class="search-input"
+      [(ngModel)]="search"
+      (ngModelChange)="applyFilters()"
+      placeholder="🔍 Rechercher N° DOS, huissier..."
+    />
+
+    <select class="filter-select" [(ngModel)]="regionFiltre" (ngModelChange)="applyFilters()">
+      <option value="">Toutes régions</option>
+      <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+    </select>
+
+    <select class="filter-select" [(ngModel)]="observationFiltre" (ngModelChange)="applyFilters()">
+      <option value="">Toutes observations</option>
+      <option value="A REGLER">À régler</option>
+      <option value="APPEL">Appel</option>
+      <option value="REGLEMENT">Règlement</option>
+      <option value="CASSATION">Cassation</option>
+    </select>
+
+    <button class="btn-search" (click)="resetFilters()">
+      <i class="fa fa-refresh"></i> Réinitialiser
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des jugements...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <div *ngIf="filteredDossiers.length === 0" class="empty-state">
+      <i class="fa fa-inbox"></i>
+      <p>Aucun jugement trouvé</p>
+    </div>
+
+    <div *ngIf="filteredDossiers.length > 0" class="judgment-table">
+      <table>
+        <thead>
+          <tr>
+            <th>N° DOS</th>
+            <th>JUG N°</th>
+            <th>Région</th>
+            <th>Signification</th>
+            <th>Huissier/Notaire</th>
+            <th>Remis financier</th>
+            <th>Montant</th>
+            <th>Observation</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let d of paginatedDossiers" (click)="goToEdit(d.id)" class="clickable-row">
+            <td><span class="dos-id">{{ d.numDos || d.num_dos || '—' }}</span></td>
+            <td><span class="jug-num">{{ d.jugNum || d.jug_num || '—' }}</span></td>
+            <td><span class="region-tag">{{ d.region || '—' }}</span></td>
+            <td>{{ d.dateSignification || d.date_signification | date:'dd/MM/yyyy' }}</td>
+            <td>{{ d.huissierNotaire || d.huissier_notaire || '—' }}</td>
+            <td>{{ d.dateRemiseFinancier || d.date_remise_financier | date:'dd/MM/yyyy' }}</td>
+            <td><span class="amount">{{ d.montantExec || d.montant_exec || '—' }}</span></td>
+            <td><span class="observation-tag">{{ d.observation || '—' }}</span></td>
+            <td class="text-center">
+              <button class="action-btn edit" (click)="goToEdit(d.id); $event.stopPropagation()">
+                <i class="fa fa-pencil"></i>
+              </button>
+              <button class="action-btn delete" (click)="supprimer(d.id, $event)">
+                <i class="fa fa-trash-o"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="filteredDossiers.length > itemsPerPage" class="modern-pagination">
+      <span class="pagination-info">Page {{ currentPage }} / {{ totalPages }}</span>
+      <div class="pagination-controls">
+        <button class="page-btn" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
+          <i class="fa fa-chevron-left"></i>
+        </button>
+        <button class="page-btn active">{{ currentPage }}</button>
+        <button class="page-btn" (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">
+          <i class="fa fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

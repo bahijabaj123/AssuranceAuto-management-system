@@ -1,0 +1,183 @@
+<!-- src/app/components/pages/auth/profil/profil.component.html -->
+<div class="profil-container">
+  
+  <!-- ===== CARTE PRINCIPALE ===== -->
+  <div class="profil-card">
+    
+    <!-- ===== EN-TÊTE ===== -->
+    <div class="profil-header">
+      <div class="avatar-container">
+        <div class="avatar">
+          {{ initiales }}
+        </div>
+        <div class="avatar-badge" [style.background]="roleColor">
+          <i [class]="roleIcon" aria-hidden="true"></i>
+        </div>
+      </div>
+      <div class="profil-info">
+        <h1 class="profil-name">{{ user.prenom }} {{ user.nom }}</h1>
+        <div class="profil-role">
+          <span class="role-badge" [class.responsable]="user.role === 'RESPONSABLE'">
+            <i [class]="roleIcon" aria-hidden="true"></i>
+            {{ roleLabel }}
+          </span>
+        </div>
+        <p class="profil-dept">
+          <i class="fa fa-building" aria-hidden="true"></i>
+          Bureau corporel — Assurance Auto
+        </p>
+        
+      </div>
+    </div>
+
+    <!-- ===== CORPS ===== -->
+    <div class="profil-body">
+
+      <!-- ===== INFORMATIONS PERSONNELLES ===== -->
+      <div class="section">
+        <div class="section-header">
+          <i class="fa fa-id-card" aria-hidden="true"></i>
+          <h2>Informations personnelles</h2>
+        </div>
+        <div class="info-grid">
+          <div class="info-field">
+            <span class="info-label">
+              <i class="fa fa-user" aria-hidden="true"></i>
+              Nom
+            </span>
+            <span class="info-value">{{ user.nom }}</span>
+          </div>
+          <div class="info-field">
+            <span class="info-label">
+              <i class="fa fa-user" aria-hidden="true"></i>
+              Prénom
+            </span>
+            <span class="info-value">{{ user.prenom }}</span>
+          </div>
+          <div class="info-field">
+            <span class="info-label">
+              <i class="fa fa-envelope" aria-hidden="true"></i>
+              Email
+            </span>
+            <span class="info-value">{{ user.email }}</span>
+          </div>
+          <div class="info-field">
+            <span class="info-label">
+              <i class="fa fa-shield" aria-hidden="true"></i>
+              Rôle
+            </span>
+            <span class="info-value">
+              <span class="role-badge small" [class.responsable]="user.role === 'RESPONSABLE'">
+                {{ roleLabel }}
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ✅ STATISTIQUES ===== -->
+      <div class="section">
+        <div class="section-header">
+          <i class="fa fa-bar-chart" aria-hidden="true"></i>
+          <h2>Statistiques</h2>
+        </div>
+        
+        <div *ngIf="isLoading" class="stats-loading">
+          <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+          Chargement des statistiques...
+        </div>
+        
+        <div *ngIf="!isLoading" class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number">{{ stats.totalDossiers }}</div>
+            <div class="stat-label">
+              <i class="fa fa-folder-open" aria-hidden="true"></i>
+              Total dossiers
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- ===== SÉCURITÉ ===== -->
+      <div class="section">
+        <div class="section-header">
+          <i class="fa fa-lock" aria-hidden="true"></i>
+          <h2>Sécurité</h2>
+          <span class="section-badge">Modifier le mot de passe</span>
+        </div>
+
+        <div class="security-form">
+          <!-- Nouveau mot de passe -->
+          <div class="form-group">
+            <label for="newPassword">
+              <i class="fa fa-lock" aria-hidden="true"></i>
+              Nouveau mot de passe
+            </label>
+            <div class="password-wrapper">
+              <input
+                id="newPassword"
+                [type]="showPwd ? 'text' : 'password'"
+                class="form-control"
+                [(ngModel)]="nouveauMotDePasse"
+                placeholder="Laisser vide pour conserver l'actuel"
+              />
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="showPwd = !showPwd"
+                tabindex="-1"
+              >
+                <i class="fa" [class.fa-eye]="!showPwd" [class.fa-eye-slash]="showPwd" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Confirmation -->
+          <div class="form-group">
+            <label for="confirmPassword">
+              <i class="fa fa-lock-check" aria-hidden="true"></i>
+              Confirmer le mot de passe
+            </label>
+            <div class="password-wrapper">
+              <input
+                id="confirmPassword"
+                [type]="showPwd ? 'text' : 'password'"
+                class="form-control"
+                [(ngModel)]="confirmerMotDePasse"
+                placeholder="Confirmer le nouveau mot de passe"
+              />
+            </div>
+          </div>
+
+          <!-- Indicateur de force -->
+          <div *ngIf="nouveauMotDePasse" class="password-strength">
+            <div class="strength-bar">
+              <div
+                class="strength-fill"
+                [style.width]="getPasswordStrength().width"
+                [style.background]="getPasswordStrength().color"
+              ></div>
+            </div>
+            <span class="strength-label" [style.color]="getPasswordStrength().color">
+              {{ getPasswordStrength().label }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ACTIONS ===== -->
+      <div class="actions-row">
+        <button class="btn-save" (click)="enregistrer()" [disabled]="isSaving">
+          <i class="fa" [class.fa-spinner]="isSaving" [class.fa-save]="!isSaving" [class.fa-spin]="isSaving" aria-hidden="true"></i>
+          {{ isSaving ? 'Enregistrement...' : 'Enregistrer les modifications' }}
+        </button>
+        <button class="btn-logout" (click)="deconnecter()">
+          <i class="fa fa-sign-out" aria-hidden="true"></i>
+          Se déconnecter
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

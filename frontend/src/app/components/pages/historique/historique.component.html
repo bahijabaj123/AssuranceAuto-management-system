@@ -1,0 +1,116 @@
+<div class="historique-container">
+  <!-- En-tête -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>📜 Historique des estimations</h1>
+      <p class="subtitle">Retrouvez toutes vos estimations précédentes</p>
+    </div>
+
+  </div>
+
+  <div class="header-right">
+  <span class="badge-count">{{ getNombreTotal() }} estimation(s)</span>
+  
+  <!-- ✅ Bouton Export Excel -->
+  <button class="btn-export-excel" (click)="exporterHistorique()" *ngIf="historique.length > 0">
+    <i class="fa fa-file-excel-o" aria-hidden="true"></i>
+    Exporter Excel
+  </button>
+  
+  <button class="btn-danger" (click)="supprimerTout()" *ngIf="historique.length > 0">
+    <i class="fa fa-trash" aria-hidden="true"></i>
+    Tout supprimer
+  </button>
+</div>
+
+
+  <!-- Statistiques -->
+  <div *ngIf="historique.length > 0" class="stats-mini">
+    <div class="stat-item">
+      <span class="stat-value">{{ getNombreTotal() }}</span>
+      <span class="stat-label">Estimations</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{{ getTauxMoyen() }}%</span>
+      <span class="stat-label">Taux IPP moyen</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{{ historique.length > 0 ? historique[0].date : '-' }}</span>
+      <span class="stat-label">Dernière estimation</span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement de l'historique...</p>
+  </div>
+
+  <!-- Liste -->
+  <div *ngIf="!isLoading">
+    <!-- Aucune estimation -->
+    <div *ngIf="historique.length === 0" class="empty-state">
+      <i class="fa fa-inbox" aria-hidden="true"></i>
+      <h3>Aucune estimation enregistrée</h3>
+      <p>Effectuez une estimation pour qu'elle apparaisse ici</p>
+      <button class="btn-primary" routerLink="/estimation">
+        <i class="fa fa-calculator" aria-hidden="true"></i>
+        Faire une estimation
+      </button>
+    </div>
+
+    <!-- Liste des estimations -->
+    <div *ngFor="let item of historique" class="historique-card">
+      <div class="card-header">
+        <div class="card-left">
+          <span class="estimation-id">{{ item.id }}</span>
+          <span class="estimation-date">{{ formaterDate(item.date) }}</span>
+        </div>
+        <div class="card-right">
+          <span class="taux-badge" [class]="getStatutClass(item.tauxEstime)">
+            {{ item.tauxEstime }}%
+          </span>
+          <span class="severity-label">{{ getSeverityLabel(item.tauxEstime) }}</span>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="info-row">
+          <span class="label">Jours ITT</span>
+          <span class="value">{{ item.nbJours }} jours</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Lésions</span>
+          <div class="lesions-list">
+            <span class="lesion-tag" *ngFor="let code of item.lesions">
+              <span class="code">{{ code }}</span>
+              {{ getLesionLabel(code) }}
+            </span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="label">Dossiers similaires</span>
+          <div class="sim-list">
+            <span class="sim-item" *ngFor="let d of item.dossiersSimilaires">
+              {{ d.id }} ({{ d.tauxIPP }}%)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button class="btn-recharger" (click)="rechargerEstimation(item.id)">
+          <i class="fa fa-refresh" aria-hidden="true"></i>
+          Recharger
+        </button>
+
+        <button class="btn-supprimer" (click)="supprimerEstimation(item.id)">
+          <i class="fa fa-trash-o" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

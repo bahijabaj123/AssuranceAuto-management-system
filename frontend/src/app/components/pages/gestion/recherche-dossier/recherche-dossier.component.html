@@ -1,0 +1,480 @@
+<!-- src/app/components/pages/gestion/recherche-dossier/recherche-dossier.component.html -->
+<div class="recherche-page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-title">
+      <i class="fa fa-search" aria-hidden="true"></i>
+      Recherche par dossier sinistre
+    </div>
+    <p class="hero-sub">
+      Entrez un numéro de dossier pour voir toutes les données liées dans les 4 tables
+    </p>
+  </div>
+
+  <!-- CARTE DE RECHERCHE -->
+  <div class="search-card">
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <i class="fa fa-file-text-o" aria-hidden="true"></i>
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="searchTerm"
+          placeholder="Ex : 20222600172"
+          (keydown.enter)="rechercher()"
+        />
+        <button class="btn-clear" *ngIf="searchTerm" (click)="resetRecherche()">
+          <i class="fa fa-times" aria-hidden="true"></i>
+        </button>
+      </div>
+      <button class="btn-search" (click)="rechercher()" [disabled]="isLoading">
+        <i class="fa fa-search" aria-hidden="true"></i>
+        {{ isLoading ? 'Recherche...' : 'Rechercher' }}
+      </button>
+    </div>
+
+    <!-- Création rapide -->
+    <div class="create-section">
+      <span class="create-label">
+        <i class="fa fa-plus-circle" aria-hidden="true"></i>
+        Créer un nouveau dossier dans
+      </span>
+      <div class="create-btns">
+        <button class="create-btn cb1" (click)="navigateTo('suivi')">
+          <i class="fa fa-folder-open" aria-hidden="true"></i>
+          <span class="lbl">Suivi des dossiers</span>
+        </button>
+        <button class="create-btn cb2" (click)="navigateTo('sortJug')">
+          <i class="fa fa-gavel" aria-hidden="true"></i>
+          <span class="lbl">Sort jug</span>
+        </button>
+        <button class="create-btn cb3" (click)="navigateTo('provisoire')">
+          <i class="fa fa-file-o" aria-hidden="true"></i>
+          <span class="lbl">Doss. provisoires</span>
+        </button>
+        <button class="create-btn cb4" (click)="navigateTo('art18')">
+          <i class="fa fa-file-text-o" aria-hidden="true"></i>
+          <span class="lbl">Art. 18</span>
+        </button>
+         <button class="create-btn cb5" (click)="navigateTo('donneesSinistres')">
+      <i class="fa fa-bar-chart" aria-hidden="true"></i>
+      <span class="lbl">📊 Données sinistres</span>
+    </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Recherche en cours...</p>
+  </div>
+
+  <!-- ============================================================
+       ✅ CAS 1 : AUCUN RÉSULTAT
+  ============================================================ -->
+  <div *ngIf="!isLoading && hasSearched && searchResult && searchResult.totalTrouve === 0" class="not-found">
+    <div class="not-found-icon">
+      <i class="fa fa-folder-o" aria-hidden="true"></i>
+    </div>
+    <h3>Dossier <strong>{{ searchTerm }}</strong> introuvable</h3>
+    <p>Aucun enregistrement lié à ce numéro dans les 4 tables.</p>
+    <p class="not-found-sub">Souhaitez-vous en créer un ?</p>
+    <div class="not-found-actions">
+      <button class="nf-btn nf-suivi" (click)="navigateTo('suivi')">
+        <i class="fa fa-folder-open" aria-hidden="true"></i> Suivi dossiers
+      </button>
+      <button class="nf-btn nf-sort" (click)="navigateTo('sortJug')">
+        <i class="fa fa-gavel" aria-hidden="true"></i> Sort jug
+      </button>
+      <button class="nf-btn nf-prov" (click)="navigateTo('provisoire')">
+        <i class="fa fa-file-o" aria-hidden="true"></i> Provisoires
+      </button>
+      <button class="nf-btn nf-art18" (click)="navigateTo('art18')">
+        <i class="fa fa-file-text-o" aria-hidden="true"></i> Art. 18
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ✅ CAS 2 : RÉSULTATS TROUVÉS
+  ============================================================ -->
+  <div *ngIf="!isLoading && hasSearched && searchResult && searchResult.totalTrouve > 0" class="results-section">
+    
+    <!-- Header du résultat -->
+    <div class="result-header has-results">
+      <div class="result-info">
+        <span class="result-icon"><i class="fa fa-folder-open" aria-hidden="true"></i></span>
+        <div>
+          <div class="result-num">{{ searchTerm }}</div>
+          <div class="result-meta">
+            <span class="tables-count">
+              <span class="count-number">{{ searchResult.totalTrouve }}</span>
+              enregistrement(s) trouvé(s)
+            </span>
+          </div>
+        </div>
+      </div>
+      <span class="result-badge found">
+        <i class="fa fa-check-circle" aria-hidden="true"></i>
+        {{ searchResult.totalTrouve }} résultat(s)
+      </span>
+    </div>
+
+    <!-- Grille des tables avec couleurs -->
+    <div class="tables-grid">
+
+      <!-- ============================================================
+           TABLE 1 : Suivi des dossiers - 🔵 BLEU
+           ============================================================ -->
+      <div class="table-card suivi-card" [class.found]="searchResult.suiviList?.length > 0" [class.empty]="!searchResult.suiviList?.length">
+        <div class="table-card-header">
+          <i class="fa fa-folder-open" aria-hidden="true"></i>
+          <span class="table-title">Suivi des dossiers</span>
+          <span class="table-status" *ngIf="searchResult.suiviList?.length > 0">
+            <i class="fa fa-check-circle" aria-hidden="true"></i>
+            {{ searchResult.suiviList.length }}
+          </span>
+          <span class="table-status empty" *ngIf="!searchResult.suiviList?.length">
+            <i class="fa fa-circle-o" aria-hidden="true"></i>
+          </span>
+        </div>
+        <div class="table-card-body">
+          <ng-container *ngIf="searchResult.suiviList && searchResult.suiviList.length > 0; else emptySuivi">
+            <div *ngFor="let item of searchResult.suiviList" class="result-item-card">
+              <div class="field-row">
+                <span class="field-label">Tiers</span>
+                <span class="field-value" [dir]="isArabic(item.tiers) ? 'rtl' : 'ltr'">{{ item.tiers || '—' }}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">1er AUD</span>
+                <span class="field-value">{{ item.premierAud || item.dateAudience || '—' }}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Région</span>
+                <span class="field-value"><span class="region-tag">{{ item.region || '—' }}</span></span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Propriétaire</span>
+                <span class="field-value">
+                  <span *ngIf="item.idUtilisateur === currentUserId" class="badge-proprio owner-me">
+                    <i class="fa fa-user" aria-hidden="true"></i> Vos dossiers
+                  </span>
+                  <span *ngIf="item.idUtilisateur && item.idUtilisateur !== currentUserId" class="badge-proprio-other">
+                    {{ getProprietaireNom(item.idUtilisateur) }}
+                  </span>
+                  <span *ngIf="!item.idUtilisateur" class="badge-proprio-none">Non assigné</span>
+                </span>
+              </div>
+              <div class="table-card-actions">
+                <button class="action-btn edit" (click)="goToEdit('suivi', item.id)" [disabled]="!isProprietaire(item.idUtilisateur)">
+                  <i class="fa fa-pencil" aria-hidden="true"></i> Modifier
+                </button>
+                <button class="action-btn delete" (click)="supprimer('suivi', item.id)" [disabled]="!isProprietaire(item.idUtilisateur)">
+                  <i class="fa fa-trash-o" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #emptySuivi>
+            <div class="empty-msg">
+              <i class="fa fa-folder-o" aria-hidden="true"></i>
+              <span>Aucun enregistrement</span>
+            </div>
+          </ng-template>
+        </div>
+        <div class="table-card-actions-footer">
+          <button *ngIf="!searchResult.suiviList?.length" class="action-btn add" (click)="goToCreate('suivi')">
+            <i class="fa fa-plus" aria-hidden="true"></i> Créer
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           TABLE 2 : Sort Jug - 🟣 VIOLET
+           ============================================================ -->
+      <div class="table-card sort-card" [class.found]="searchResult.sortJugList?.length > 0" [class.empty]="!searchResult.sortJugList?.length">
+        <div class="table-card-header">
+          <i class="fa fa-gavel" aria-hidden="true"></i>
+          <span class="table-title">Sort jugement</span>
+          <span class="table-status" *ngIf="searchResult.sortJugList?.length > 0">
+            <i class="fa fa-check-circle" aria-hidden="true"></i>
+            {{ searchResult.sortJugList.length }}
+          </span>
+          <span class="table-status empty" *ngIf="!searchResult.sortJugList?.length">
+            <i class="fa fa-circle-o" aria-hidden="true"></i>
+          </span>
+        </div>
+        <div class="table-card-body">
+          <ng-container *ngIf="searchResult.sortJugList && searchResult.sortJugList.length > 0; else emptySortJug">
+            <div *ngFor="let item of searchResult.sortJugList" class="result-item-card">
+              <div class="field-row">
+                <span class="field-label">Jug. N°</span>
+                <span class="field-value">{{ item.jugNum || item.jug_num || '—' }}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Région</span>
+                <span class="field-value"><span class="region-tag">{{ item.region || '—' }}</span></span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Huissier</span>
+                <span class="field-value" [dir]="isArabic(item.huissierNotaire) ? 'rtl' : 'ltr'">{{ item.huissierNotaire || item.huissier_notaire || '—' }}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Observation</span>
+                <span class="field-value">
+                  <span class="obs-badge" [class.obs-regler]="item.observation === 'A REGLER'"
+                        [class.obs-appel]="item.observation === 'APPEL'">
+                    {{ item.observation || '—' }}
+                  </span>
+                </span>
+              </div>
+              <div class="table-card-actions">
+                <button class="action-btn edit" (click)="goToEdit('sortJug', item.id)">
+                  <i class="fa fa-pencil" aria-hidden="true"></i> Modifier
+                </button>
+                <button class="action-btn delete" (click)="supprimer('sortJug', item.id)">
+                  <i class="fa fa-trash-o" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #emptySortJug>
+            <div class="empty-msg">
+              <i class="fa fa-gavel" aria-hidden="true"></i>
+              <span>Aucun enregistrement</span>
+            </div>
+          </ng-template>
+        </div>
+        <div class="table-card-actions-footer">
+          <button *ngIf="!searchResult.sortJugList?.length" class="action-btn add" (click)="goToCreate('sortJug')">
+            <i class="fa fa-plus" aria-hidden="true"></i> Créer
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           TABLE 3 : Dossiers Provisoires - 🟠 ORANGE
+           ============================================================ -->
+      <div class="table-card prov-card" [class.found]="searchResult.provisoireList?.length > 0" [class.empty]="!searchResult.provisoireList?.length">
+        <div class="table-card-header">
+          <i class="fa fa-file-o" aria-hidden="true"></i>
+          <span class="table-title">Dossier provisoire</span>
+          <span class="table-status" *ngIf="searchResult.provisoireList?.length > 0">
+            <i class="fa fa-check-circle" aria-hidden="true"></i>
+            {{ searchResult.provisoireList.length }}
+          </span>
+          <span class="table-status empty" *ngIf="!searchResult.provisoireList?.length">
+            <i class="fa fa-circle-o" aria-hidden="true"></i>
+          </span>
+        </div>
+        <div class="table-card-body">
+          <ng-container *ngIf="searchResult.provisoireList && searchResult.provisoireList.length > 0; else emptyProvisoire">
+            <div *ngFor="let item of searchResult.provisoireList" class="result-item-card">
+              <div class="field-row">
+                <span class="field-label">N° PROV</span>
+                <span class="field-value">{{ item.numProv || item.num_prov || '—' }}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Affaire</span>
+                <span class="field-value" [dir]="isArabic(item.affaire) ? 'rtl' : 'ltr'">{{ item.affaire || item.aff || '—' }}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">N° Sinistre</span>
+                <span class="field-value">{{ item.numSinistre || item.num_sinistre || '—' }}</span>
+              </div>
+              <div class="table-card-actions">
+                <button class="action-btn edit" (click)="goToEdit('provisoire', item.id)">
+                  <i class="fa fa-pencil" aria-hidden="true"></i> Modifier
+                </button>
+                <button class="action-btn delete" (click)="supprimer('provisoire', item.id)">
+                  <i class="fa fa-trash-o" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #emptyProvisoire>
+            <div class="empty-msg">
+              <i class="fa fa-file-o" aria-hidden="true"></i>
+              <span>Aucun enregistrement</span>
+            </div>
+          </ng-template>
+        </div>
+        <div class="table-card-actions-footer">
+          <button *ngIf="!searchResult.provisoireList?.length" class="action-btn add" (click)="goToCreate('provisoire')">
+            <i class="fa fa-plus" aria-hidden="true"></i> Créer
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           TABLE 4 : Art. 18 - 🔴 ROUGE
+           ============================================================ -->
+      <div class="table-card art-card" [class.found]="searchResult.art18List?.length > 0" [class.empty]="!searchResult.art18List?.length">
+        <div class="table-card-header">
+          <i class="fa fa-file-text-o" aria-hidden="true"></i>
+          <span class="table-title">Art. 18</span>
+          <span class="table-status" *ngIf="searchResult.art18List?.length > 0">
+            <i class="fa fa-check-circle" aria-hidden="true"></i>
+            {{ searchResult.art18List.length }}
+          </span>
+          <span class="table-status empty" *ngIf="!searchResult.art18List?.length">
+            <i class="fa fa-circle-o" aria-hidden="true"></i>
+          </span>
+        </div>
+        <div class="table-card-body">
+          <ng-container *ngIf="searchResult.art18List && searchResult.art18List.length > 0; else emptyArt18">
+            <div *ngFor="let item of searchResult.art18List" class="result-item-card">
+              <div class="field-row">
+                <span class="field-label">Réf.</span>
+                <span class="field-value">{{ item.reference || '—' }}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Cie adverse</span>
+                <span class="field-value" [dir]="isArabic(item.cieAdverse) ? 'rtl' : 'ltr'">{{ item.cieAdverse || item.cie_adverse || '—' }}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Blessé</span>
+                <span class="field-value" [dir]="isArabic(item.blesse) ? 'rtl' : 'ltr'">{{ item.blesse || '—' }}</span>
+              </div>
+              <div class="table-card-actions">
+                <button class="action-btn edit" (click)="goToEdit('art18', item.id)">
+                  <i class="fa fa-pencil" aria-hidden="true"></i> Modifier
+                </button>
+                <button class="action-btn delete" (click)="supprimer('art18', item.id)">
+                  <i class="fa fa-trash-o" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #emptyArt18>
+            <div class="empty-msg">
+              <i class="fa fa-file-text-o" aria-hidden="true"></i>
+              <span>Aucun enregistrement</span>
+            </div>
+          </ng-template>
+        </div>
+        <div class="table-card-actions-footer">
+          <button *ngIf="!searchResult.art18List?.length" class="action-btn add" (click)="goToCreate('art18')">
+            <i class="fa fa-plus" aria-hidden="true"></i> Créer
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================================
+     TABLE 5 : Données Sinistres - 🟢 VERT
+     ============================================================ -->
+<div class="table-card sinistre-card" [class.found]="searchResult.donneesSinistresList?.length > 0" [class.empty]="!searchResult.donneesSinistresList?.length">
+  <div class="table-card-header">
+    <i class="fa fa-bar-chart" aria-hidden="true"></i>
+    <span class="table-title">📊 Données sinistres (IPP)</span>
+    <span class="table-status" *ngIf="searchResult.donneesSinistresList?.length > 0">
+      <i class="fa fa-check-circle" aria-hidden="true"></i>
+      {{ searchResult.donneesSinistresList.length }}
+    </span>
+    <span class="table-status empty" *ngIf="!searchResult.donneesSinistresList?.length">
+      <i class="fa fa-circle-o" aria-hidden="true"></i>
+    </span>
+  </div>
+  <div class="table-card-body">
+    <ng-container *ngIf="searchResult.donneesSinistresList && searchResult.donneesSinistresList.length > 0; else emptyDonneesSinistres">
+      <div *ngFor="let item of searchResult.donneesSinistresList" class="result-item-card">
+        <div class="field-row">
+          <span class="field-label">SIN</span>
+          <span class="field-value"><strong>{{ item.sin }}</strong></span>
+        </div>
+        <!-- ✅ NOUVEAU : Nom du tiers -->
+        <div class="field-row">
+          <span class="field-label">Tiers</span>
+          <span class="field-value">
+            <span *ngIf="item.nomTiers" class="badge-tiers">
+              <i class="fa fa-user" aria-hidden="true"></i> {{ item.nomTiers }}
+            </span>
+            <span *ngIf="!item.nomTiers" class="text-muted">—</span>
+          </span>
+        </div>
+        <div class="field-row-grid">
+          <div class="field-col">
+            <span class="field-label">Année</span>
+            <span class="field-value"><span class="badge-annee">{{ item.annee }}</span></span>
+          </div>
+          <div class="field-col">
+            <span class="field-label">IPP (%)</span>
+            <span class="field-value">
+              <span *ngIf="item.ipp" class="badge-ipp">{{ item.ipp }}%</span>
+              <span *ngIf="!item.ipp" class="text-muted">—</span>
+            </span>
+          </div>
+        </div>
+        <div class="field-row-grid">
+          <div class="field-col">
+            <span class="field-label">NBR JRS</span>
+            <span class="field-value">
+              <span *ngIf="item.nbrJrs" class="badge-jrs">{{ item.nbrJrs }}</span>
+              <span *ngIf="!item.nbrJrs" class="text-muted">—</span>
+            </span>
+          </div>
+          <div class="field-col">
+            <span class="field-label">RCC</span>
+            <span class="field-value">{{ item.rcc || '—' }}</span>
+          </div>
+        </div>
+        <div class="field-row-grid">
+          <div class="field-col">
+            <span class="field-label">RCM</span>
+            <span class="field-value">{{ item.rcm || '—' }}</span>
+          </div>
+          <div class="field-col">
+            <span class="field-label">DOMMAGE</span>
+            <span class="field-value">{{ item.dommage || '—' }}</span>
+          </div>
+        </div>
+        <div class="field-row-grid">
+          <div class="field-col">
+            <span class="field-label">VOL</span>
+            <span class="field-value">{{ item.vol || '—' }}</span>
+          </div>
+          <div class="field-col">
+            <span class="field-label">INC</span>
+            <span class="field-value">{{ item.inc || '—' }}</span>
+          </div>
+        </div>
+        <div *ngIf="item.dommagesVehicules || item.brisGlaces || item.domCollision" class="field-row-grid">
+          <div class="field-col">
+            <span class="field-label">DOMMAGES VEHICULES</span>
+            <span class="field-value">{{ item.dommagesVehicules || '—' }}</span>
+          </div>
+          <div class="field-col">
+            <span class="field-label">BRIS GLACES</span>
+            <span class="field-value">{{ item.brisGlaces || '—' }}</span>
+          </div>
+        </div>
+        <div class="table-card-actions">
+          <button class="action-btn edit" (click)="goToEdit('donneesSinistres', item.id)">
+            <i class="fa fa-pencil" aria-hidden="true"></i> Modifier
+          </button>
+          <button class="action-btn delete" (click)="supprimer('donneesSinistres', item.id)">
+            <i class="fa fa-trash-o" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #emptyDonneesSinistres>
+      <div class="empty-msg">
+        <i class="fa fa-bar-chart" aria-hidden="true"></i>
+        <span>Aucune donnée sinistre pour ce numéro</span>
+      </div>
+    </ng-template>
+  </div>
+  <div class="table-card-actions-footer">
+    <button *ngIf="!searchResult.donneesSinistresList?.length" class="action-btn add" (click)="navigateTo('donneesSinistres')">
+      <i class="fa fa-plus" aria-hidden="true"></i> Créer
+    </button>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>

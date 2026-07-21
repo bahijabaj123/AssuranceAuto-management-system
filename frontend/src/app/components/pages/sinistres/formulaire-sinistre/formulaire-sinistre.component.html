@@ -1,0 +1,406 @@
+<!-- src/app/components/pages/sinistres/formulaire-sinistre/formulaire-sinistre.component.html -->
+<div class="formulaire-container">
+  
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>
+        <i class="fa fa-file-text-o" aria-hidden="true"></i>
+        {{ isEditMode ? 'Modifier le sinistre' : 'Nouveau sinistre' }}
+      </h1>
+      <p class="subtitle">
+        {{ isEditMode ? 'Modification des informations du sinistre' : 'Création d\'un nouveau sinistre' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement du sinistre...</p>
+  </div>
+
+  <!-- Formulaire -->
+  <form *ngIf="!isLoading" (ngSubmit)="enregistrer()" #form="ngForm" class="formulaire-card">
+    
+    <!-- ============================================================ -->
+    <!-- SECTION 1 : Identifiant -->
+    <!-- ============================================================ -->
+    <div class="form-section">
+      <div class="section-title">
+        <i class="fa fa-tag" aria-hidden="true"></i>
+        Identifiant du sinistre
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="sin">N° SIN <span class="required">*</span></label>
+          <input
+            id="sin"
+            type="text"
+            class="form-control"
+            [(ngModel)]="sinistre.sin"
+            name="sin"
+            required
+            placeholder="Ex: 20232800353"
+          />
+        </div>
+        <div class="form-group">
+          <label for="annee">Année <span class="required">*</span></label>
+          <select
+            id="annee"
+            class="form-control"
+            [(ngModel)]="sinistre.annee"
+            name="annee"
+            required
+          >
+            <option *ngFor="let a of annees" [value]="a">{{ a }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+<!-- SECTION 2 : IPP et Jours -->
+<!-- ============================================================ -->
+<div class="form-section">
+  <div class="section-title">
+    <i class="fa fa-percent" aria-hidden="true"></i>
+    Taux IPP et durée
+  </div>
+  
+  <!-- ✅ NOUVEAU : Nom du tiers -->
+  <div class="form-row">
+    <div class="form-group">
+      <label for="nomTiers">Nom du tiers</label>
+      <input
+        id="nomTiers"
+        type="text"
+        class="form-control"
+        [(ngModel)]="sinistre.nomTiers"
+        name="nomTiers"
+        placeholder="Nom du tiers (victime/responsable)"
+      />
+    </div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-group">
+      <label for="ipp">IPP (%)</label>
+      <input
+        id="ipp"
+        type="text"
+        class="form-control"
+        [(ngModel)]="sinistre.ipp"
+        name="ipp"
+        placeholder="Ex: 28%"
+      />
+    </div>
+    <div class="form-group">
+      <label for="nbrJrs">NBR JRS</label>
+      <input
+        id="nbrJrs"
+        type="text"
+        class="form-control"
+        [(ngModel)]="sinistre.nbrJrs"
+        name="nbrJrs"
+        placeholder="Ex: 90"
+      />
+    </div>
+  </div>
+</div>
+    <!-- ============================================================ -->
+    <!-- SECTION 3 : Montants principaux -->
+    <!-- ============================================================ -->
+    <div class="form-section">
+      <div class="section-title">
+        <i class="fa fa-money" aria-hidden="true"></i>
+        Montants principaux
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="rcc">RCC</label>
+          <input
+            id="rcc"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.rcc"
+            name="rcc"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label for="rcm">RCM</label>
+          <input
+            id="rcm"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.rcm"
+            name="rcm"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dommage">DOMMAGE</label>
+          <input
+            id="dommage"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.dommage"
+            name="dommage"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label for="vol">VOL</label>
+          <input
+            id="vol"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.vol"
+            name="vol"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="inc">INC</label>
+          <input
+            id="inc"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.inc"
+            name="inc"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label for="afp">AFP</label>
+          <input
+            id="afp"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.afp"
+            name="afp"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="aux">AUX</label>
+          <input
+            id="aux"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.aux"
+            name="aux"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label for="dommagesVehicules">DOMMAGES VEHICULES</label>
+          <input
+            id="dommagesVehicules"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.dommagesVehicules"
+            name="dommagesVehicules"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="brisGlaces">BRIS GLACES</label>
+          <input
+            id="brisGlaces"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.brisGlaces"
+            name="brisGlaces"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label for="domCollision">DOM COLLISION</label>
+          <input
+            id="domCollision"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.domCollision"
+            name="domCollision"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 4 : Montants réglementés -->
+    <!-- ============================================================ -->
+    <div class="form-section">
+      <div class="section-title">
+        <i class="fa fa-balance-scale" aria-hidden="true"></i>
+        Montants réglementés (REG)
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="regRcc">REG RCC</label>
+          <input
+            id="regRcc"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.regRcc"
+            name="regRcc"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label for="regRcm">REG RCM</label>
+          <input
+            id="regRcm"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.regRcm"
+            name="regRcm"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="regDommagesVehicules">REG DOMMAGES VEHICULES</label>
+          <input
+            id="regDommagesVehicules"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.regDommagesVehicules"
+            name="regDommagesVehicules"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label for="regBrisGlaces">REG BRIS GLACES</label>
+          <input
+            id="regBrisGlaces"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.regBrisGlaces"
+            name="regBrisGlaces"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="regDomCollision">REG DOM COLLISION</label>
+          <input
+            id="regDomCollision"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.regDomCollision"
+            name="regDomCollision"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label for="regDommage">REG DOMMAGE</label>
+          <input
+            id="regDommage"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.regDommage"
+            name="regDommage"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="regVol">REG VOL</label>
+          <input
+            id="regVol"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.regVol"
+            name="regVol"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label for="regInc">REG INC</label>
+          <input
+            id="regInc"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.regInc"
+            name="regInc"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="regAfp">REG AFP</label>
+          <input
+            id="regAfp"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.regAfp"
+            name="regAfp"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label for="regAux">REG AUX</label>
+          <input
+            id="regAux"
+            type="number"
+            class="form-control"
+            [(ngModel)]="sinistre.regAux"
+            name="regAux"
+            placeholder="0.00"
+            step="0.01"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ACTIONS -->
+    <!-- ============================================================ -->
+    <div class="form-actions">
+      <button type="button" class="btn-annuler" (click)="annuler()">
+        <i class="fa fa-times" aria-hidden="true"></i> Annuler
+      </button>
+      <button type="submit" class="btn-enregistrer" [disabled]="form.invalid || isSaving">
+        <i class="fa" [class.fa-spinner]="isSaving" [class.fa-save]="!isSaving" [class.fa-spin]="isSaving" aria-hidden="true"></i>
+        {{ isSaving ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+    </div>
+
+  </form>
+
+</div>

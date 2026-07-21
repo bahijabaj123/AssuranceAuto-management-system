@@ -1,0 +1,287 @@
+/* src/app/components/pages/auth/register/register.component.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a2540 0%, #1a4b6b 50%, #2a6b8b 100%);
+  padding: 20px;
+}
+
+/* ✅ AGRANDIR LA CARTE */
+.register-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 48px 56px;  /* ✅ Augmenté de 36px/40px à 48px/56px */
+  width: 100%;
+  max-width: 520px;    /* ✅ Augmenté de 460px à 520px */
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== En-tête ===== */
+.register-header {
+  text-align: center;
+  margin-bottom: 32px;  /* ✅ Augmenté */
+}
+
+.register-header h1 {
+  font-size: 26px;      /* ✅ Augmenté de 22px */
+  font-weight: 700;
+  color: #0a2540;
+  margin-bottom: 6px;
+}
+
+.register-header .subtitle {
+  font-size: 14px;      /* ✅ Augmenté de 13px */
+  color: #6b7a8f;
+}
+
+/* ===== Formulaire ===== */
+.register-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;            /* ✅ Augmenté de 14px */
+}
+
+.register-form .form-group {
+  margin-bottom: 18px;  /* ✅ Augmenté de 16px */
+}
+
+.register-form label {
+  display: block;
+  font-size: 12px;      /* ✅ Augmenté de 11px */
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.register-form label i {
+  color: #4cc8dd;
+  width: 16px;
+  font-size: 14px;
+}
+
+.register-form .form-control {
+  width: 100%;
+  padding: 12px 16px;   /* ✅ Augmenté de 10px/14px */
+  border: 2px solid #e6eaef;
+  border-radius: 10px;
+  font-size: 15px;      /* ✅ Augmenté de 14px */
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  background: #f8f9fc;
+  color: #1a202c;
+}
+
+.register-form .form-control:focus {
+  outline: none;
+  border-color: #4cc8dd;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(76, 200, 221, 0.1);
+}
+
+.register-form .form-control::placeholder {
+  color: #a0aec0;
+  font-size: 14px;
+}
+
+/* ===== Mot de passe ===== */
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper .form-control {
+  padding-right: 44px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #a0aec0;
+  padding: 4px;
+  font-size: 18px;      /* ✅ Augmenté de 16px */
+}
+
+.toggle-password:hover {
+  color: #4a5568;
+}
+
+/* ===== Force du mot de passe ===== */
+.password-strength {
+  margin-top: 8px;      /* ✅ Augmenté de 6px */
+}
+
+.strength-bar {
+  height: 5px;          /* ✅ Augmenté de 4px */
+  background: #e6eaef;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.strength-fill {
+  height: 100%;
+  border-radius: 20px;
+  transition: width 0.3s, background 0.3s;
+}
+
+.strength-label {
+  font-size: 11px;      /* ✅ Augmenté de 10px */
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+/* ===== Rôle ===== */
+.role-select {
+  display: flex;
+  gap: 12px;            /* ✅ Augmenté de 10px */
+  margin-top: 4px;
+}
+
+.role-btn {
+  flex: 1;
+  padding: 12px;        /* ✅ Augmenté de 10px */
+  border: 2px solid #e6eaef;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f8f9fc;
+}
+
+.role-btn:hover {
+  border-color: #4cc8dd;
+  background: #e8f7fb;
+}
+
+.role-btn.selected {
+  border-color: #0a2540;
+  background: #e8ecff;
+}
+
+.role-btn i {
+  display: block;
+  font-size: 22px;      /* ✅ Augmenté de 20px */
+  margin-bottom: 4px;
+  color: #0a2540;
+}
+
+.role-btn .rl {
+  font-size: 13px;      /* ✅ Augmenté de 12px */
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.role-btn.selected .rl {
+  color: #0a2540;
+}
+
+/* ===== Bouton ===== */
+.btn-register {
+  width: 100%;
+  padding: 16px;        /* ✅ Augmenté de 14px */
+  background: linear-gradient(135deg, #0a2540, #1a4b6b);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 17px;      /* ✅ Augmenté de 16px */
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Inter', sans-serif;
+  margin-top: 8px;
+}
+
+.btn-register:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(10, 37, 64, 0.3);
+}
+
+.btn-register:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-register i {
+  font-size: 18px;
+}
+
+.fa-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Lien ===== */
+.link-row {
+  text-align: center;
+  font-size: 14px;      /* ✅ Augmenté de 13px */
+  color: #4a5568;
+  margin-top: 18px;     /* ✅ Augmenté de 16px */
+}
+
+.link-row a {
+  color: #1a3a7a;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border-bottom: 1px dashed #c7d2fe;
+  transition: all 0.2s;
+}
+
+.link-row a:hover {
+  color: #4cc8dd;
+  border-color: #4cc8dd;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 480px) {
+  .register-card {
+    padding: 24px 20px;
+  }
+
+  .register-header h1 {
+    font-size: 20px;
+  }
+
+  .register-form .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .role-select {
+    flex-direction: column;
+  }
+}

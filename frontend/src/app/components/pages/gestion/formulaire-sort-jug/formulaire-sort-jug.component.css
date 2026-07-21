@@ -1,0 +1,263 @@
+/* ============================================================
+   FORMULAIRE SORT JUG
+   ============================================================ */
+
+.form-wrap {
+  background: #f0f4ff;
+  padding: 18px;
+  border-radius: 12px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.form-card {
+  background: #fff;
+  border: 1px solid #e6eaef;
+  border-radius: 14px;
+  padding: 22px 26px;
+}
+
+.f-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #070d8f;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 3px;
+}
+
+.f-title i {
+  color: #4cc8dd;
+  font-size: 17px;
+}
+
+.f-sub {
+  font-size: 12px;
+  color: #4a5568;
+  margin-bottom: 18px;
+}
+
+/* ── Mode badge ── */
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  background: #fff3e0;
+  color: #e65100;
+  padding: 3px 12px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+}
+
+.mode-badge i {
+  font-size: 11px;
+}
+
+.mode-badge.new-mode {
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+/* ── Sections ── */
+.section {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f4ff;
+}
+
+.section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 8px;
+}
+
+.sec-hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sec-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  background: #e8ecff;
+  color: #070d8f;
+}
+
+.sec-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #070d8f;
+}
+
+/* ── Grid ── */
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.fg {
+  display: flex;
+  flex-direction: column;
+}
+
+.fg.full {
+  grid-column: 1 / -1;
+}
+
+.fg label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+
+.fg label .req {
+  color: #e74c3c;
+  margin-left: 2px;
+}
+
+.fg input,
+.fg select,
+.fg textarea {
+  padding: 8px 11px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-family: 'Inter', sans-serif;
+  background: #f8f9fc;
+  outline: none;
+  transition: all 0.15s;
+  color: #1a202c;
+  width: 100%;
+}
+
+.fg input:focus,
+.fg select:focus,
+.fg textarea:focus {
+  border-color: #4cc8dd;
+  box-shadow: 0 0 0 3px rgba(76, 200, 221, 0.14);
+  background: #fff;
+}
+
+.fg textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+/* ── Actions ── */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.btn-cancel {
+  padding: 9px 20px;
+  background: #f8f9fc;
+  border: 1px solid #e6eaef;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #4a5568;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.btn-cancel:hover {
+  background: #e6eaef;
+}
+
+.btn-save {
+  padding: 9px 22px;
+  background: #070d8f;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 3px 10px rgba(7, 13, 143, 0.22);
+  transition: all 0.15s;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #0a13c4;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(7, 13, 143, 0.3);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .form-wrap {
+    padding: 10px;
+  }
+  .form-card {
+    padding: 16px;
+  }
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+  .actions {
+    flex-direction: column;
+  }
+  .btn-cancel,
+  .btn-save {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Loading ── */
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e6eaef;
+  border-top-color: #070d8f;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  font-size: 14px;
+  color: #4a5568;
+}

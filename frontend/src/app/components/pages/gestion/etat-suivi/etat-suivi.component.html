@@ -1,0 +1,222 @@
+<!-- src/app/components/pages/gestion/etat-suivi/etat-suivi.component.html -->
+<div class="gestion-container">
+  <div class="page-header">
+    <div class="header-left">
+      <h1><i class="fa fa-tasks" aria-hidden="true"></i> État et suivi des dossiers</h1>
+      <p class="subtitle">Gestion des dossiers judiciaires — <span class="count">{{ filteredDossiers.length }} dossiers</span></p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" [routerLink]="['/gestion/formulaire-judiciaire']">
+        <i class="fa fa-plus" aria-hidden="true"></i> Nouveau dossier
+      </button>
+      <button class="btn-secondary" (click)="exporterExcel()">
+        <i class="fa fa-file-excel-o" aria-hidden="true"></i> Exporter Excel
+      </button>
+      <button class="btn-secondary" (click)="chargerDossiers()">
+        <i class="fa fa-refresh" aria-hidden="true"></i> Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- FILTRES -->
+  <div class="filters-section">
+    
+    <div class="filters-row">
+      <div class="filter-group">
+        <label><i class="fa fa-search" aria-hidden="true"></i> Rechercher</label>
+        <input 
+          type="text" 
+          class="filter-input" 
+          [(ngModel)]="search" 
+          (ngModelChange)="applyFilters()" 
+          placeholder="N° DOS, tiers, avocat..."
+        />
+      </div>
+      <div class="filter-group">
+        <label>Région</label>
+        <select class="filter-select" [(ngModel)]="regionFiltre" (ngModelChange)="applyFilters()">
+          <option value="">Toutes</option>
+          <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Nature affaire</label>
+        <select class="filter-select" [(ngModel)]="natureFiltre" (ngModelChange)="applyFilters()">
+          <option value="">Toutes</option>
+          <option *ngFor="let n of natures" [value]="n">{{ n }}</option>
+        </select>
+      </div>
+      <div class="filter-group actions">
+        <button class="btn-reset" (click)="resetFilters()">
+          <i class="fa fa-refresh" aria-hidden="true"></i> Réinitialiser
+        </button>
+      </div>
+    </div>
+
+    <div class="filters-row">
+      <div class="filter-group range">
+        <label> IPP (%)</label>
+        <div class="range-inputs">
+          <input 
+            type="number" 
+            class="filter-input range-input" 
+            [(ngModel)]="ippMin" 
+            (ngModelChange)="applyFilters()" 
+            placeholder="Min"
+            min="0"
+            max="100"
+          />
+          <span class="range-separator">→</span>
+          <input 
+            type="number" 
+            class="filter-input range-input" 
+            [(ngModel)]="ippMax" 
+            (ngModelChange)="applyFilters()" 
+            placeholder="Max"
+            min="0"
+            max="100"
+          />
+        </div>
+      </div>
+      <div class="filter-group range">
+        <label>📅 NB JOURS</label>
+        <div class="range-inputs">
+          <input 
+            type="number" 
+            class="filter-input range-input" 
+            [(ngModel)]="nbJoursMin" 
+            (ngModelChange)="applyFilters()" 
+            placeholder="Min"
+            min="0"
+          />
+          <span class="range-separator">→</span>
+          <input 
+            type="number" 
+            class="filter-input range-input" 
+            [(ngModel)]="nbJoursMax" 
+            (ngModelChange)="applyFilters()" 
+            placeholder="Max"
+            min="0"
+          />
+        </div>
+      </div>
+      <div class="filter-group">
+  <label><i class="fa fa-user" aria-hidden="true"></i> Propriétaire</label>
+  <select class="filter-select" [(ngModel)]="proprietaireFiltre" (ngModelChange)="applyFilters()">
+    <option value="moi"> Mes dossiers</option>
+    <option value="">👥Tous les dossiers</option>
+    <option *ngFor="let u of utilisateurs" [value]="u.id">
+      {{ u.nom }} {{ u.prenom || '' }}
+    </option>
+  </select>
+</div>
+      <div class="filter-group actions">
+        <!-- Espace réservé -->
+      </div>
+    </div>
+
+    <!-- ✅ Ligne 3 : FILTRE ANNÉE (NOUVEAU) -->
+  <div class="filters-row">
+    <div class="filter-group">
+      <label>📅 Année</label>
+      <select class="filter-select" [(ngModel)]="anneeFiltre" (ngModelChange)="applyFilters()">
+        <option [ngValue]="null">Toutes les années</option>
+        <option *ngFor="let a of anneesDisponibles" [ngValue]="a">{{ a }}</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <!-- Espace pour équilibrer -->
+    </div>
+    <div class="filter-group">
+      <!-- Espace pour équilibrer -->
+    </div>
+    <div class="filter-group actions">
+      <!-- Espace pour équilibrer -->
+    </div>
+  </div>
+
+</div>
+
+  <!-- LOADING -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des dossiers...</p>
+  </div>
+
+  <!-- TABLEAU -->
+  <div *ngIf="!isLoading">
+    <div *ngIf="filteredDossiers.length === 0" class="empty-state">
+      <i class="fa fa-inbox" aria-hidden="true"></i>
+      <p>Aucun dossier trouvé</p>
+    </div>
+
+    <div *ngIf="filteredDossiers.length > 0" class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>N° DOS</th>
+            <th>1er AUD</th>
+            <th>Tiers</th>
+            <th>IPP (%)</th>
+            <th>NB JOURS</th>
+            <th>Règlements</th>
+            <th>Nat. affaire</th>
+            <th>Région</th>
+            <th>Avocat</th>
+            <th>1ère Inst.</th>
+            <th>Date Rep. Inst.</th>
+            <th>Date Jug. Inst.</th>
+            <th>Appel N°</th>
+            <th>Date Rep. Appel</th>
+            <th>Date Jug. Appel</th>
+            <th>Cassation N°</th>
+            <th>Date Jug. Cass.</th>
+            <th>Observation</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of paginatedDossiers" (click)="goToEdit(d.id)" class="clickable-row">
+            <td><span class="num-dos">{{ d.numDos || d.num_dos }}</span></td>
+            <td>{{ d.dateAudience || d.date_audience | date:'dd/MM/yyyy' }}</td>
+            <td>{{ d.tiers || '—' }}</td>
+            <td>{{ d.ipp || '—' }}</td>
+            <td>{{ d.nbJours || d.nb_jours || '—' }}</td>
+            <td>{{ d.reglements || '—' }}</td>
+            <td><span class="badge">{{ d.natureAff || d.nature_aff || '—' }}</span></td>
+            <td><span class="region-tag">{{ d.region || '—' }}</span></td>
+            <td>{{ d.avocat || '—' }}</td>
+            <td>{{ d.affInstance || d.aff_instance || '—' }}</td>
+            <td>{{ d.dateReportInstance || d.date_report_instance | date:'dd/MM/yyyy' }}</td>
+            <td>{{ d.dateJugInstance || d.date_jug_instance | date:'dd/MM/yyyy' }}</td>
+            <td>{{ d.affAppel || d.aff_appel || '—' }}</td>
+            <td>{{ d.dateReportAppel || d.date_report_appel | date:'dd/MM/yyyy' }}</td>
+            <td>{{ d.dateJugAppel || d.date_jug_appel | date:'dd/MM/yyyy' }}</td>
+            <td>{{ d.affCassation || d.aff_cassation || '—' }}</td>
+            <td>{{ d.dateJugCassation || d.date_jug_cassation | date:'dd/MM/yyyy' }}</td>
+            <td>{{ d.observation || '—' }}</td>
+            <td class="actions">
+              <button class="btn-edit" title="Modifier" (click)="goToEdit(d.id); $event.stopPropagation()">
+                <i class="fa fa-pencil" aria-hidden="true"></i>
+              </button>
+              <button class="btn-delete" title="Supprimer" (click)="supprimer(d.id, $event)">
+                <i class="fa fa-trash-o" aria-hidden="true"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="filteredDossiers.length > itemsPerPage" class="pagination">
+      <button class="page-btn" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+      </button>
+      <span class="page-info">Page {{ currentPage }} / {{ totalPages }}</span>
+      <button class="page-btn" (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</div>

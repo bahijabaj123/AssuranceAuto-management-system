@@ -1,0 +1,132 @@
+<div class="base-lesions-container">
+  <!-- En-tête -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>🗄️ Base des lésions</h1>
+      <p class="subtitle">Gestion du référentiel des lésions utilisées pour l'estimation IPP</p>
+    </div>
+    <div class="header-right">
+      <span class="badge-count">{{ lesions.length }} lésion(s)</span>
+      <button class="btn-add" (click)="showAddForm = !showAddForm">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        {{ showAddForm ? 'Annuler' : 'Ajouter' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Message de confirmation -->
+  <div *ngIf="saveMessage" class="message" [class.success]="messageType === 'success'" [class.error]="messageType === 'error'">
+    <i class="fa" [class.fa-check-circle]="messageType === 'success'" [class.fa-exclamation-circle]="messageType === 'error'" aria-hidden="true"></i>
+    {{ saveMessage }}
+  </div>
+
+  <!-- Formulaire d'ajout -->
+  <div *ngIf="showAddForm" class="add-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Code</label>
+        <input
+          type="text"
+          class="form-input"
+          [(ngModel)]="newLesion.code"
+          placeholder="ex: L26"
+          maxlength="5"
+        />
+      </div>
+      <div class="form-group flex-2">
+        <label>Libellé</label>
+        <input
+          type="text"
+          class="form-input"
+          [(ngModel)]="newLesion.libelle"
+          placeholder="ex: Fracture du coude"
+        />
+      </div>
+      <div class="form-group actions">
+        <button class="btn-save" (click)="ajouterLesion()" [disabled]="!newLesion.code || !newLesion.libelle">
+          <i class="fa fa-check" aria-hidden="true"></i>
+          Ajouter
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recherche -->
+  <div class="search-bar">
+    <i class="fa fa-search" aria-hidden="true"></i>
+    <input
+      type="text"
+      class="search-input"
+      [(ngModel)]="searchFilter"
+      (ngModelChange)="applyFilter()"
+      placeholder="Rechercher par code ou libellé..."
+    />
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <!-- Liste -->
+  <div *ngIf="!isLoading">
+    <div *ngIf="filteredLesions.length === 0" class="empty-state">
+      <i class="fa fa-inbox" aria-hidden="true"></i>
+      <p>Aucune lésion trouvée</p>
+    </div>
+
+    <div class="lesions-grid">
+      <div *ngFor="let lesion of filteredLesions; let i = index" class="lesion-card">
+        <div *ngIf="editingIndex !== i" class="lesion-content">
+          <div class="lesion-code">{{ lesion.code }}</div>
+          <div class="lesion-label">{{ lesion.libelle }}</div>
+          <div class="lesion-actions">
+            <button class="btn-edit" (click)="commencerEdition(i)">
+              <i class="fa fa-pencil" aria-hidden="true"></i>
+            </button>
+            <button class="btn-delete" (click)="supprimerLesion(i)">
+              <i class="fa fa-trash-o" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mode édition -->
+        <div *ngIf="editingIndex === i" class="lesion-edit">
+          <div class="edit-row">
+            <div class="edit-group small">
+              <label>Code</label>
+              <input
+                type="text"
+                class="form-input"
+                [(ngModel)]="editLesion.code"
+                maxlength="5"
+              />
+            </div>
+            <div class="edit-group flex-2">
+              <label>Libellé</label>
+              <input
+                type="text"
+                class="form-input"
+                [(ngModel)]="editLesion.libelle"
+              />
+            </div>
+            <div class="edit-actions">
+              <button class="btn-save-small" (click)="sauvegarderEdition(i)">
+                <i class="fa fa-check" aria-hidden="true"></i>
+              </button>
+              <button class="btn-cancel-small" (click)="annulerEdition()">
+                <i class="fa fa-times" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="footer-stats">
+      <span>📊 {{ filteredLesions.length }} lésion(s) affichée(s) sur {{ lesions.length }}</span>
+    </div>
+  </div>
+</div>

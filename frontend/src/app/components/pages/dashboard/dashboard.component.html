@@ -1,0 +1,137 @@
+<div class="dashboard-container">
+  <div class="page-header">
+    <h1>📊 Dashboard Statistiques</h1>
+    <p class="subtitle">Vue d'ensemble de la sinistralité corporelle</p>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des statistiques...</p>
+  </div>
+
+  <!-- Contenu -->
+  <div *ngIf="!isLoading">
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card" (click)="navigateToDossiers()">
+        <div class="kpi-icon">📁</div>
+        <div class="kpi-info">
+          <span class="kpi-label">Total dossiers</span>
+          <span class="kpi-value">{{ totalDossiers }}</span>
+        </div>
+      </div>
+      <div class="kpi-card" (click)="navigateToDossiers()">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-info">
+          <span class="kpi-label">Taux IPP moyen</span>
+          <span class="kpi-value">{{ tauxMoyen }}%</span>
+        </div>
+      </div>
+      <div class="kpi-card" (click)="navigateToDossiers()">
+        <div class="kpi-icon">📅</div>
+        <div class="kpi-info">
+          <span class="kpi-label">Jours ITT moyens</span>
+          <span class="kpi-value">{{ joursMoyen }}j</span>
+        </div>
+      </div>
+      <div class="kpi-card" (click)="navigateToDossiers()">
+        <div class="kpi-icon">🩺</div>
+        <div class="kpi-info">
+          <span class="kpi-label">Types de lésions</span>
+          <span class="kpi-value">{{ totalLesions }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphique 1 : Évolution mensuelle -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">📈 Évolution mensuelle</span>
+        <span class="chart-badge">Cliquez sur une barre pour filtrer</span>
+      </div>
+      <div class="chart-body">
+        <div class="bar-chart">
+          <div 
+            *ngFor="let item of evolutionParMois" 
+            class="bar-item" 
+            (click)="navigateToDossiersParMois(item.mois, item.moisNum)"
+          >
+            <div class="bar-container" [style.height.px]="80">
+              <div 
+                class="bar" 
+                [style.height.%]="(item.count / getMaxCount()) * 100"
+                [title]="item.mois + ': ' + item.count + ' dossiers'"
+              ></div>
+            </div>
+            <span class="bar-label">{{ item.mois }}</span>
+            <span class="bar-value">{{ item.count }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphique 2 : Distribution des taux IPP -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">📊 Distribution des taux IPP</span>
+        <span class="chart-badge">Cliquez sur une tranche pour filtrer</span>
+      </div>
+      <div class="chart-body">
+        <div class="distribution-chart">
+          <div 
+            *ngFor="let item of distributionIPP" 
+            class="dist-item" 
+            (click)="navigateToDossiersParTaux(item.range, item.min, item.max)"
+          >
+            <span class="dist-label">{{ item.range }}</span>
+            <div class="dist-bar-container">
+              <div 
+                class="dist-bar" 
+                [style.width.%]="(item.count / getMaxCount()) * 100"
+                [class.eleve]="item.range.includes('30%+')"
+                [class.moyen]="item.range.includes('20') || item.range.includes('10')"
+                [class.faible]="item.range.includes('0')"
+              ></div>
+            </div>
+            <span class="dist-count">{{ item.count }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphique 3 : Top lésions -->
+    <div class="chart-card full-width">
+      <div class="chart-header">
+        <span class="chart-title">🩺 Top lésions les plus fréquentes</span>
+        <span class="chart-badge">Cliquez sur une lésion pour filtrer</span>
+      </div>
+      <div class="chart-body">
+        <div class="top-lesions">
+          <div 
+            *ngFor="let item of topLesions" 
+            class="lesion-item" 
+            (click)="navigateToDossiersParLesion(item.code)"
+          >
+            <span class="lesion-code">{{ item.code }}</span>
+            <span class="lesion-label">{{ item.libelle }}</span>
+            <div class="lesion-bar-container">
+              <div 
+                class="lesion-bar" 
+                [style.width.%]="(item.count / getMaxLesionCount()) * 100"
+              ></div>
+            </div>
+            <span class="lesion-count">{{ item.count }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="dashboard-footer">
+      <span>📊 Dernière mise à jour : {{ today | date:'dd/MM/yyyy HH:mm' }}</span>
+      <span class="hint">Cliquez sur un graphique pour filtrer les dossiers</span>
+    </div>
+  </div>
+</div>

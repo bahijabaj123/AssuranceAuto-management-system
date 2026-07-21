@@ -1,0 +1,127 @@
+<!-- src/app/components/pages/gestion/formulaire-art18/formulaire-art18.component.html -->
+<div class="form-wrap">
+  <div class="form-card">
+
+    <!-- ⚠️ LOADING - Afficher pendant le chargement -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement du dossier...</p>
+    </div>
+
+    <!-- ✅ FORMULAIRE - S'affiche quand les données sont chargées -->
+    <div *ngIf="!isLoading && isDataLoaded">
+
+      <div class="f-title">
+        <i class="fa fa-file-text-o" aria-hidden="true"></i>
+        Dossier Art. 18
+      </div>
+      <p class="f-sub">Bureau corporel — Carte Assurances</p>
+
+      <!-- Mode édition ou création -->
+      <div class="mode-badge" *ngIf="isEditMode">
+        <i class="fa fa-pencil" aria-hidden="true"></i>
+        Mode édition — Réf. <strong>{{ dossier.reference || '...' }}</strong>
+      </div>
+      <div class="mode-badge new-mode" *ngIf="!isEditMode">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        Nouveau dossier Art. 18
+      </div>
+
+      <form (ngSubmit)="enregistrer()" #form="ngForm">
+
+        <!-- Section 1: Référence -->
+        <div class="section">
+          <div class="sec-hdr">
+            <div class="sec-icon"><i class="fa fa-hashtag" aria-hidden="true"></i></div>
+            <span class="sec-title">Référence</span>
+          </div>
+          <div class="grid2">
+            <div class="fg">
+              <label>Réf. <span class="req">*</span></label>
+              <input 
+                [(ngModel)]="dossier.reference" 
+                name="reference" 
+                required
+                placeholder="Ex: 20212800168"
+                #reference="ngModel"
+              />
+              <div *ngIf="reference.invalid && reference.touched" class="error-msg">
+                La référence est obligatoire
+              </div>
+            </div>
+            <div class="fg">
+              <label>Compagnie adverse</label>
+              <input [(ngModel)]="dossier.cieAdverse" name="cieAdverse" placeholder="STAR, GAT, Amina..."/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Localisation & blessé -->
+        <div class="section">
+          <div class="sec-hdr">
+            <div class="sec-icon"><i class="fa fa-map-marker" aria-hidden="true"></i></div>
+            <span class="sec-title">Localisation & blessé</span>
+          </div>
+          <div class="grid2">
+            <div class="fg">
+              <label>Région</label>
+              <select [(ngModel)]="dossier.region" name="region">
+                <option value="">Sélectionner</option>
+                <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Blessé</label>
+              <input [(ngModel)]="dossier.blesse" name="blesse" placeholder="Nom du blessé"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Correspondance -->
+        <div class="section">
+          <div class="sec-hdr">
+            <div class="sec-icon"><i class="fa fa-envelope-o" aria-hidden="true"></i></div>
+            <span class="sec-title">Correspondance</span>
+          </div>
+          <div class="grid2">
+            <div class="fg">
+              <label>Date envoi lettre info</label>
+              <input type="date" [(ngModel)]="dossier.dateEnvoiLettInfo" name="dateEnvoiLettInfo"/>
+            </div>
+            <div class="fg">
+              <label>Date</label>
+              <input type="date" [(ngModel)]="dossier.date" name="date"/>
+            </div>
+          </div>
+
+          <!-- SEC RECUP INFORME - Texte libre -->
+          <div class="fg" style="margin-top: 14px;">
+            <label>SEC RECUP INFORME</label>
+            <input 
+              [(ngModel)]="dossier.secRecupInforme" 
+              name="secRecupInforme"
+              placeholder="Oui, Non, Pas encore, En cours, ou ce que vous voulez..."
+              class="sec-status-input"
+            />
+            <small style="color: #6b7a8f; font-size: 11px; margin-top: 4px;">
+              ✏️ Texte libre : écrivez ce que vous voulez
+            </small>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button type="button" class="btn-cancel" (click)="annuler()">
+            <i class="fa fa-times" aria-hidden="true"></i> Annuler
+          </button>
+          <button type="submit" class="btn-save" [disabled]="isSaving || form.invalid">
+            <i class="fa fa-floppy-o" aria-hidden="true"></i>
+            {{ isSaving ? 'Enregistrement...' : 'Enregistrer le dossier' }}
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>

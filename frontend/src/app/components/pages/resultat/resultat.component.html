@@ -1,0 +1,107 @@
+<div class="resultat-container">
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Estimation en cours...</p>
+    <p class="sub">Analyse des lésions et calcul du taux IPP</p>
+  </div>
+
+  <div *ngIf="!isLoading && estimation">
+    <!-- Résultat principal -->
+    <div class="result-card">
+      <div class="result-header">
+        <i class="fa fa-chart-line" aria-hidden="true"></i>
+        <span>Résultat de l'estimation</span>
+      </div>
+      <div class="result-body">
+        <div class="ipp-gauge-container">
+          <div class="ipp-value" id="ipp-display">0%</div>
+          <div class="ipp-label">Taux IPP estimé</div>
+          <div class="gauge-bar-wrap">
+            <div class="gauge-bar-fill" id="gauge-fill" style="width:0%;"></div>
+          </div>
+          <div class="gauge-scale">
+            <span>0%</span>
+            <span>25%</span>
+            <span>50%</span>
+            <span>75%</span>
+            <span>100%</span>
+          </div>
+          <div class="severity-badge" [class]="getSeverity(estimation.tauxEstime).cls">
+            <i class="fa" [class]="getSeverity(estimation.tauxEstime).icon" aria-hidden="true"></i>
+            Invalidité {{ getSeverity(estimation.tauxEstime).label }}
+          </div>
+        </div>
+
+        <div class="range-info">
+          <span>📊 Fourchette estimée</span>
+          <strong>{{ estimation.min }}% — {{ estimation.max }}%</strong>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-mini">
+            <div class="stat-mini-val">{{ nbJours }}j</div>
+            <div class="stat-mini-lbl">Jours ITT</div>
+          </div>
+          <div class="stat-mini">
+            <div class="stat-mini-val">{{ codesLesions.length }}</div>
+            <div class="stat-mini-lbl">Lésion(s)</div>
+          </div>
+          <div class="stat-mini">
+            <div class="stat-mini-val">{{ estimation.nbDossiersSimilaires }}</div>
+            <div class="stat-mini-lbl">Dossiers similaires</div>
+          </div>
+        </div>
+
+        <div class="disclaimer">
+          <i class="fa fa-info-circle" aria-hidden="true"></i>
+          Estimation indicative — validation gestionnaire requise
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Dossiers similaires -->
+<div class="similar-card">
+    <div class="card-header">
+        <i class="fa fa-files-o" aria-hidden="true"></i>
+        <span class="card-title">Dossiers similaires</span>
+        <span class="badge">{{ dossiersSimilaires.length }} trouvés</span>
+    </div>
+    <div class="similar-list">
+        <div 
+            class="similar-item" 
+            *ngFor="let dossier of dossiersSimilaires"
+            (click)="goToDossierDetail(dossier.id)"
+        >
+            <div class="sim-left">
+                <div class="sim-id">
+                    <i class="fa fa-file" aria-hidden="true"></i>
+                    {{ dossier.id }}
+                </div>
+                <div class="sim-lesions">
+                    <span *ngFor="let code of dossier.lesions" class="tag-mini">
+                        {{ code }}
+                    </span>
+                </div>
+            </div>
+            <div class="sim-right">
+                <div class="sim-ipp">{{ dossier.ipp }}%</div>  <!-- ← Utiliser ipp ou tauxIPP selon le backend -->
+                <div class="sim-score">similitude {{ dossier.score }}%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="detail-actions">
+  <!-- ✅ Bouton Export PDF -->
+  <button class="btn-export-pdf" (click)="exporterPDF()">
+    <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+    Exporter en PDF
+  </button>
+  
+  <button class="btn-back" (click)="nouvelleEstimation()">
+    <i class="fa fa-arrow-left" aria-hidden="true"></i>
+    Nouvelle estimation
+  </button>
+</div>

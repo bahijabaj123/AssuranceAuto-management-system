@@ -1,0 +1,14 @@
+/* src/app/components/layout/auth-layout/auth-layout.component.css */
+.auth-layout {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0a2540 0%, #1a4b6b 50%, #2a6b8b 100%);
+  padding: 20px;
+}
+
+.auth-content {
+  width: 100%;
+  max-width: 460px;
+}

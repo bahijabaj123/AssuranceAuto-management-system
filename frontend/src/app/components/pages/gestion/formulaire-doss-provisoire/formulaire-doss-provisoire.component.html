@@ -1,0 +1,145 @@
+<!-- formulaire-doss-provisoire.component.html -->
+<div class="form-wrap">
+  <div class="form-card">
+
+    <!-- ⚠️ LOADING -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement du dossier...</p>
+    </div>
+
+    <!-- ✅ FORMULAIRE - Utiliser isDataLoaded pour plus de sécurité -->
+    <div *ngIf="!isLoading && isDataLoaded">
+      
+      <div class="f-title">
+        <i class="fa fa-file-o" aria-hidden="true"></i>
+        Dossier provisoire
+      </div>
+      <p class="f-sub">Bureau corporel — Carte Assurances</p>
+
+      <!-- Mode édition ou création -->
+      <div class="mode-badge" *ngIf="isEditMode">
+        <i class="fa fa-pencil" aria-hidden="true"></i>
+        Mode édition — N° {{ dossier.numProv }}
+      </div>
+      <div class="mode-badge new-mode" *ngIf="!isEditMode">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        Nouveau dossier provisoire
+      </div>
+
+      <form (ngSubmit)="enregistrer()" #form="ngForm">
+
+        <!-- Section 1: Identification -->
+        <div class="section">
+          <div class="sec-hdr">
+            <div class="sec-icon"><i class="fa fa-id-card-o" aria-hidden="true"></i></div>
+            <span class="sec-title">Identification</span>
+          </div>
+          <div class="grid2">
+            <div class="fg">
+              <label>N° DOS PROV <span class="req">*</span></label>
+              <input 
+                [(ngModel)]="dossier.numProv" 
+                name="numProv" 
+                required 
+                placeholder="Ex: P01/2024"
+                #numProv="ngModel"
+              />
+              <div *ngIf="numProv.invalid && numProv.touched" class="error-msg">
+                Le numéro de dossier est obligatoire
+              </div>
+            </div>
+            <div class="fg">
+              <label>AFF</label>
+              <input [(ngModel)]="dossier.affaire" name="affaire" placeholder="Ex: 43016"/>
+            </div>
+          </div>
+          <div class="fg">
+            <label>NATURE</label>
+            <select [(ngModel)]="dossier.nature" name="nature">
+              <option value="">Sélectionner</option>
+              <option *ngFor="let n of natures" [value]="n">{{ n }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Section 2: Parties & procédure -->
+        <div class="section">
+          <div class="sec-hdr">
+            <div class="sec-icon"><i class="fa fa-users" aria-hidden="true"></i></div>
+            <span class="sec-title">Parties & procédure</span>
+          </div>
+          <div class="grid2">
+            <div class="fg">
+              <label>TIERS</label>
+              <input [(ngModel)]="dossier.tiers" name="tiers" placeholder="Nom du tiers"/>
+            </div>
+            <div class="fg">
+              <label>1ER AUDIENCE</label>
+              <input type="date" [(ngModel)]="dossier.date" name="date"/>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="fg">
+              <label>RÉGION / TRIBUNAL</label>
+              <select [(ngModel)]="dossier.regionTrib" name="regionTrib">
+                <option value="">Sélectionner</option>
+                <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>AVOCAT</label>
+              <input [(ngModel)]="dossier.avocat" name="avocat" placeholder="Nom de l'avocat"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Lien sinistre -->
+        <div class="section">
+          <div class="sec-hdr">
+            <div class="sec-icon"><i class="fa fa-link" aria-hidden="true"></i></div>
+            <span class="sec-title">Lien sinistre</span>
+          </div>
+          <div class="fg">
+            <label>N° DOS SIN</label>
+            <input [(ngModel)]="dossier.numSinistre" name="numSinistre" placeholder="Ex: 20182506965"/>
+          </div>
+        </div>
+
+        <!-- Section 4: Observation -->
+        <div class="section">
+          <div class="sec-hdr">
+            <div class="sec-icon"><i class="fa fa-sticky-note-o" aria-hidden="true"></i></div>
+            <span class="sec-title">Observation</span>
+          </div>
+          <div class="fg full">
+            <textarea 
+              [(ngModel)]="dossier.observation" 
+              name="observation"
+              placeholder="Notes complémentaires..." 
+              rows="4"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button type="button" class="btn-cancel" (click)="annuler()">
+            <i class="fa fa-times" aria-hidden="true"></i> Annuler
+          </button>
+          <button type="submit" class="btn-save" [disabled]="isSaving || form.invalid">
+            <i class="fa fa-floppy-o" aria-hidden="true"></i>
+            {{ isSaving ? 'Enregistrement...' : 'Enregistrer le dossier' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- ⚠️ DEBUG - Afficher les variables (à retirer après) -->
+    <div style="margin-top: 20px; padding: 10px; background: #f0f0f0; font-size: 12px; display: none;">
+      <p>DEBUG: isLoading = {{ isLoading }}, isDataLoaded = {{ isDataLoaded }}</p>
+      <p>Dossier: {{ dossier | json }}</p>
+    </div>
+  </div>
+</div>
