@@ -101,8 +101,20 @@
 - Maven 3.8+
 - Angular CLI 19+
 
+### 👤 Auteur
+### Bahija BEN ABDELJALIL
+📧 Email : benabdeljalilbahija@gmail.com
+🔗 LinkedIn : https://www.linkedin.com/in/bahija-ben-abdeljalil-827955298/
+🐙 GitHub : github.com/bahijabaj123
+
+### 🙏 Remerciements
+* Carte Assurances - Pour le projet et la confiance
+* Toute l'équipe du Bureau Corporel - Pour leur collaboration et leur soutien
+
 ### 1️⃣ Cloner le projet
 
 ```bash
 git clone https://github.com/bahijabaj123/AssuranceAuto-management-system.git
 cd AssuranceAuto-management-system
+
+
