@@ -6,7 +6,7 @@
 [![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?style=flat-square&logo=chart.js&logoColor=white)](https://www.chartjs.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-> **Plateforme complète de gestion des sinistres et de suivi des taux IPP**  
+> **Plateforme complète de gestion des sinistres **  
 > *Développé pour le Bureau Corporel de Carte Assurances*
 
 ---
