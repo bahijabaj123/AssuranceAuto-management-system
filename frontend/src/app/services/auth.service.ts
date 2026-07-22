@@ -8,7 +8,7 @@ import { LoginRequest, RegisterRequest, AuthResponse } from '../models/auth.mode
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   
-  private apiUrl = 'http://localhost:8081/api/auth';
+  private apiUrl = 'https://carte-assurance-backend.onrender.com/api/auth';
   
   private currentUserSubject = new BehaviorSubject<AuthResponse | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();

@@ -197,7 +197,7 @@ interface DonneeSinistre {
 })
 export class StatistiquesService {
 
-  private readonly apiUrl = 'http://localhost:8081/api/donnees-sinistres';
+  private readonly apiUrl = 'https://carte-assurance-backend.onrender.com/api/donnees-sinistres';
 
   // ✅ Tranches IPP
   private readonly bracketsIpp = [

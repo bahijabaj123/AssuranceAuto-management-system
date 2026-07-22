@@ -6,7 +6,7 @@ import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class DossierJudiciaireService {
-  private apiUrl = 'http://localhost:8081/api/suivi-dossiers';
+  private apiUrl = 'https://carte-assurance-backend.onrender.com/api/suivi-dossiers';
 
   constructor(
     private http: HttpClient,
@@ -55,7 +55,7 @@ export class DossierJudiciaireService {
 
   // ✅ Récupérer tous les utilisateurs pour le filtre propriétaire
   getUtilisateurs(): Observable<any[]> {
-    return this.http.get<any[]>('http://localhost:8081/api/utilisateurs');
+    return this.http.get<any[]>('https://carte-assurance-backend.onrender.com/api/utilisateurs');
   }
 
   extraireAnnee(numDos: string): number | null {

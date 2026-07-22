@@ -6,7 +6,7 @@ import { DossierProvisoire } from '../models/dossier-provisoire.model';
 
 @Injectable({ providedIn: 'root' })
 export class DossierProvisoireService {
-  private apiUrl = 'http://localhost:8081/api/dossiers-provisoires';
+  private apiUrl = 'https://carte-assurance-backend.onrender.com/api/dossiers-provisoires';
 
   constructor(private http: HttpClient) {}
 

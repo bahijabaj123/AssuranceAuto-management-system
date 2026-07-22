@@ -7,7 +7,7 @@ import { TiersSinistre } from '../models/tiers-sinistre.model';
   providedIn: 'root'
 })
 export class TiersSinistreService {
-  private apiUrl = 'http://localhost:8081/api/tiers-sinistres';
+  private apiUrl = 'https://carte-assurance-backend.onrender.com/api/tiers-sinistres';
 
   constructor(private http: HttpClient) {}
 

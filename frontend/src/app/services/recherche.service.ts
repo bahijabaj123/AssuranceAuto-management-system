@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class RechercheService {
-  private apiUrl = 'http://localhost:8081/api';
+  private apiUrl = 'https://carte-assurance-backend.onrender.com/api';
 
   constructor(private http: HttpClient) {}
 

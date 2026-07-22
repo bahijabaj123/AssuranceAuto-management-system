@@ -8,7 +8,7 @@ import { DonneesSinistre } from '../models/donnees-sinistre.model';
   providedIn: 'root'
 })
 export class DonneesSinistreService {
-  private apiUrl = 'http://localhost:8081/api/donnees-sinistres';
+  private apiUrl = 'https://carte-assurance-backend.onrender.com/api/donnees-sinistres';
 
   constructor(private http: HttpClient) {}
 
