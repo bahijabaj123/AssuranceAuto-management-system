@@ -1,69 +1,52 @@
 <!-- src/app/components/pages/sinistres/dashboard-sinistres/dashboard-sinistres.component.html -->
 <div class="dashboard-container">
-  
-  <!-- ============================================================ -->
+
   <!-- HEADER -->
-  <!-- ============================================================ -->
   <div class="page-header">
     <div class="header-left">
       <h1><i class="fa fa-dashboard" aria-hidden="true"></i> Tableau de bord des sinistres</h1>
       <p class="subtitle">Statistiques et visualisations des données IPP</p>
     </div>
     <div class="header-actions">
-      <!-- ✅ Filtre par année -->
       <select class="filter-select" [(ngModel)]="anneeFiltre" (change)="appliquerFiltre()">
         <option [ngValue]="null">📅 Toutes les années</option>
         <option *ngFor="let a of anneesDisponibles" [ngValue]="a">{{ a }}</option>
       </select>
-      
-      <!-- ✅ Recherche rapide -->
+
       <div class="search-quick">
-        <input 
-          type="text" 
-          placeholder="🔍 Rechercher un sinistre..." 
-          [(ngModel)]="searchTerm"
-          (keyup.enter)="rechercherSinistre(searchTerm)"
-        />
+        <input type="text" placeholder="🔍 Rechercher un sinistre..." [(ngModel)]="searchTerm" (keyup.enter)="rechercherSinistre(searchTerm)"/>
         <button (click)="rechercherSinistre(searchTerm)">
           <i class="fa fa-search" aria-hidden="true"></i>
         </button>
       </div>
-      
+
       <button class="btn-secondary" (click)="chargerDonnees()">
         <i class="fa fa-refresh" aria-hidden="true"></i> Actualiser
       </button>
-      
-      <!-- ✅ Exportation avancée -->
+
       <button class="btn-primary" (click)="exporterDashboardComplet()">
         <i class="fa fa-download" aria-hidden="true"></i> Exporter
       </button>
     </div>
   </div>
 
-  <!-- ============================================================ -->
   <!-- LOADING -->
-  <!-- ============================================================ -->
   <div *ngIf="isLoading" class="loading-state">
     <div class="spinner"></div>
     <p>Chargement des statistiques...</p>
   </div>
 
-  <!-- ============================================================ -->
   <!-- DASHBOARD -->
-  <!-- ============================================================ -->
   <div *ngIf="!isLoading">
 
-    <!-- ========================================================== -->
-    <!-- KPI CARDS AVEC TENDANCES -->
-    <!-- ========================================================== -->
+    <!-- KPI CARDS -->
     <div class="kpi-grid">
-      <!-- KPI 1 : Total sinistres -->
       <div class="kpi-card">
         <div class="kpi-icon blue">
           <i class="fa fa-file-text-o" aria-hidden="true"></i>
         </div>
         <div class="kpi-info">
-          <span class="kpi-value">{{ globalStats.total || 0 }}</span>
+          <span class="kpi-value">{{ globalStatsDisplay.total || 0 }}</span>
           <span class="kpi-label">Total sinistres</span>
           <span class="kpi-tendance">
             <i [class]="'fa ' + getTendanceIcon('total')" aria-hidden="true"></i>
@@ -72,13 +55,12 @@
         </div>
       </div>
 
-      <!-- KPI 2 : IPP moyen -->
       <div class="kpi-card">
         <div class="kpi-icon green">
           <i class="fa fa-percent" aria-hidden="true"></i>
         </div>
         <div class="kpi-info">
-          <span class="kpi-value">{{ globalStats.ippMoyen || 0 }}%</span>
+          <span class="kpi-value">{{ globalStatsDisplay.ippMoyen || 0 }}%</span>
           <span class="kpi-label">IPP moyen</span>
           <span class="kpi-tendance">
             <i [class]="'fa ' + getTendanceIcon('ippMoyen')" aria-hidden="true"></i>
@@ -87,13 +69,12 @@
         </div>
       </div>
 
-      <!-- KPI 3 : NBR JRS moyen -->
       <div class="kpi-card">
         <div class="kpi-icon orange">
           <i class="fa fa-calendar" aria-hidden="true"></i>
         </div>
         <div class="kpi-info">
-          <span class="kpi-value">{{ globalStats.nbrJrsMoyen || 0 }}</span>
+          <span class="kpi-value">{{ globalStatsDisplay.nbrJrsMoyen || 0 }}</span>
           <span class="kpi-label">NBR JRS moyen</span>
           <span class="kpi-tendance">
             <i [class]="'fa ' + getTendanceIcon('nbrJrsMoyen')" aria-hidden="true"></i>
@@ -102,13 +83,12 @@
         </div>
       </div>
 
-      <!-- KPI 4 : Total RCC -->
       <div class="kpi-card">
         <div class="kpi-icon purple">
           <i class="fa fa-money" aria-hidden="true"></i>
         </div>
         <div class="kpi-info">
-          <span class="kpi-value">{{ (globalStats.rccTotal || 0) | number:'1.0-0' }} DT</span>
+          <span class="kpi-value">{{ (globalStatsDisplay.rccTotal || 0) | number:'1.0-0' }} DT</span>
           <span class="kpi-label">Total RCC</span>
           <span class="kpi-tendance">
             <i [class]="'fa ' + getTendanceIcon('rccTotal')" aria-hidden="true"></i>
@@ -117,13 +97,12 @@
         </div>
       </div>
 
-      <!-- KPI 5 : Total RCM -->
       <div class="kpi-card">
         <div class="kpi-icon red">
           <i class="fa fa-money" aria-hidden="true"></i>
         </div>
         <div class="kpi-info">
-          <span class="kpi-value">{{ (globalStats.rcmTotal || 0) | number:'1.0-0' }} DT</span>
+          <span class="kpi-value">{{ (globalStatsDisplay.rcmTotal || 0) | number:'1.0-0' }} DT</span>
           <span class="kpi-label">Total RCM</span>
           <span class="kpi-tendance">
             <i [class]="'fa ' + getTendanceIcon('rcmTotal')" aria-hidden="true"></i>
@@ -132,13 +111,12 @@
         </div>
       </div>
 
-      <!-- KPI 6 : Avec IPP -->
       <div class="kpi-card">
         <div class="kpi-icon teal">
           <i class="fa fa-database" aria-hidden="true"></i>
         </div>
         <div class="kpi-info">
-          <span class="kpi-value">{{ globalStats.avecIpp || 0 }}</span>
+          <span class="kpi-value">{{ globalStatsDisplay.avecIpp || 0 }}</span>
           <span class="kpi-label">Avec IPP</span>
           <span class="kpi-tendance">
             <i [class]="'fa ' + getTendanceIcon('avecIpp')" aria-hidden="true"></i>
@@ -148,82 +126,74 @@
       </div>
     </div>
 
-    <!-- ========================================================== -->
     <!-- GRAPHIQUES -->
-    <!-- ========================================================== -->
     <div class="charts-grid">
 
-      <!-- Graphique 1 : Évolution -->
       <div class="chart-card">
         <div class="chart-header">
           <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Évolution des sinistres</h3>
-          <span class="chart-badge">Par année</span>
+          <span class="chart-badge">Cliquez sur une année</span>
         </div>
         <div class="chart-body">
           <canvas #chartEvolution></canvas>
         </div>
       </div>
 
-      <!-- Graphique 2 : Répartition IPP -->
       <div class="chart-card">
         <div class="chart-header">
           <h3><i class="fa fa-pie-chart" aria-hidden="true"></i> Répartition IPP</h3>
-          <span class="chart-badge">Par tranche</span>
+          <span class="chart-badge">Cliquez sur une tranche</span>
         </div>
         <div class="chart-body">
           <canvas #chartRepartition></canvas>
         </div>
       </div>
 
-      <!-- Graphique 3 : IPP Moyen par année -->
       <div class="chart-card">
         <div class="chart-header">
           <h3><i class="fa fa-bar-chart" aria-hidden="true"></i> IPP Moyen par année</h3>
-          <span class="chart-badge">En pourcentage</span>
+          <span class="chart-badge">Cliquez sur une barre</span>
         </div>
         <div class="chart-body">
           <canvas #chartIppMoyen></canvas>
         </div>
       </div>
 
-      <!-- Graphique 4 : Montants RCC / RCM -->
       <div class="chart-card">
         <div class="chart-header">
           <h3><i class="fa fa-bar-chart" aria-hidden="true"></i> Montants RCC et RCM</h3>
-          <span class="chart-badge">En milliers de DT</span>
+          <span class="chart-badge">Cliquez sur une année</span>
         </div>
         <div class="chart-body">
           <canvas #chartMontants></canvas>
         </div>
       </div>
 
-      <!-- Graphique 5 : Évolution des règlements -->
       <div class="chart-card">
         <div class="chart-header">
           <h3><i class="fa fa-money" aria-hidden="true"></i> Évolution des règlements</h3>
-          <span class="chart-badge">En milliers de DT</span>
+          <span class="chart-badge">Cliquez sur une année</span>
         </div>
         <div class="chart-body">
           <canvas #chartReglements></canvas>
         </div>
       </div>
 
-      <!-- ========================================================== -->
-      <!-- SECTION TOP 5 + DERNIERS SINISTRES -->
-      <!-- ========================================================== -->
+      <!-- TOP 5 -->
       <div class="chart-card top-section">
         <div class="chart-header">
           <h3><i class="fa fa-trophy" aria-hidden="true"></i> Top 5 des sinistres</h3>
-          <span class="chart-badge">Par montant RCC</span>
+          <span class="chart-badge">Cliquez pour voir le sinistre</span>
         </div>
         <div class="top-list">
-          <div *ngFor="let s of topSinistres; let i = index" class="top-item">
+          <div *ngFor="let s of topSinistresDisplay; let i = index" class="top-item clickable" (click)="naviguerVersSinistre(s.id)">
             <span class="top-rank">{{ i + 1 }}</span>
             <span class="top-sin">{{ s.sin }}</span>
             <span class="top-tiers">{{ s.nomTiers || '—' }}</span>
             <span class="top-montant">{{ s.rcc | number:'1.0-0' }} DT</span>
+            <i class="fa fa-chevron-right top-arrow" aria-hidden="true"></i>
           </div>
-          <div *ngIf="topSinistres.length === 0" class="top-empty">
+          <div *ngIf="topSinistresDisplay.length === 0" class="top-empty">
             <i class="fa fa-inbox" aria-hidden="true"></i>
             <span>Aucun sinistre avec RCC</span>
           </div>
@@ -234,13 +204,14 @@
       <div class="chart-card recent-section">
         <div class="chart-header">
           <h3><i class="fa fa-clock-o" aria-hidden="true"></i> Derniers sinistres ajoutés</h3>
-          <span class="chart-badge">Récents</span>
+          <span class="chart-badge">Cliquez pour voir le sinistre</span>
         </div>
         <div class="recent-list">
-          <div *ngFor="let s of derniersSinistres" class="recent-item">
+          <div *ngFor="let s of derniersSinistres" class="recent-item clickable" (click)="naviguerVersSinistre(s.id)">
             <span class="recent-sin">{{ s.sin }}</span>
             <span class="recent-tiers">{{ s.nomTiers || '—' }}</span>
             <span class="recent-date">{{ s.dateCreation | date:'dd/MM/yyyy' }}</span>
+            <i class="fa fa-chevron-right recent-arrow" aria-hidden="true"></i>
           </div>
           <div *ngIf="derniersSinistres.length === 0" class="recent-empty">
             <i class="fa fa-inbox" aria-hidden="true"></i>
@@ -252,12 +223,128 @@
     </div>
 
     <!-- ========================================================== -->
-    <!-- TABLEAU STATISTIQUES PAR ANNÉE -->
+    <!-- TABLEAUX COÛT MOYEN PAR DOSSIER                            -->
     <!-- ========================================================== -->
+
+    <!-- Tableau 1 : Coût moyen — Tranche IPP -->
+    <div class="table-section" *ngIf="coutMoyenDossier">
+      <div class="table-header">
+        <h3><i class="fa fa-calculator" aria-hidden="true"></i> Coût moyen par dossier — Tranche IPP</h3>
+        <span class="table-count">{{ anneeFiltre || 'Toutes années' }}</span>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table clickable-table">
+          <thead>
+            <tr>
+              <th>Tranche IPP</th>
+              <th>Nbr blessés</th>
+              <th>Nbr dossiers</th>
+              <th>Coût total (DT)</th>
+              <th>Coût moyen / blessé (DT)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of coutMoyenDossier.parIpp" (click)="naviguerParTrancheIPP(t.tranche)" class="clickable-row">
+              <td><span class="badge-annee">{{ t.tranche }}</span></td>
+              <td>{{ t.nbrBless }}</td>
+              <td>{{ t.nbrDos }}</td>
+              <td>{{ t.coutTotal | number:'1.0-0' }} DT</td>
+              <td>{{ t.coutMoyen | number:'1.0-0' }} DT</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>TT</th>
+              <th>{{ coutMoyenDossier.totalBless }}</th>
+              <th>{{ coutMoyenDossier.totalDos }}</th>
+              <th></th>
+              <th>{{ coutMoyenDossier.coutMoyenParBless | number:'1.0-0' }} DT</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="table-footer" *ngIf="anneeFiltre">
+        <span class="table-info">
+          <i class="fa fa-info-circle" aria-hidden="true"></i>
+          Cliquez sur une tranche pour filtrer les sinistres correspondants
+        </span>
+      </div>
+    </div>
+
+    <!-- Tableau 2 : Coût moyen — Tranche NBR-JR -->
+<div class="table-section" *ngIf="coutMoyenDossier">
+  <div class="table-header">
+    <h3><i class="fa fa-calendar" aria-hidden="true"></i> Coût moyen par dossier — Nombre de jours</h3>
+    <span class="table-count">{{ anneeFiltre || 'Toutes années' }}</span>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table clickable-table">
+      <thead>
+        <tr>
+          <th>Tranche NBR-JR</th>
+          <th>Nbr blessés</th>
+          <th>Coût total (DT)</th>
+          <th>Coût moyen (DT)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of coutMoyenDossier.parNbrJr" 
+            (click)="naviguerParTrancheNbrJr(t.tranche)"
+            class="clickable-row">
+          <td><span class="badge-annee">{{ t.tranche }}</span></td>
+          <td>{{ t.nbrBless }}</td>
+          <td>{{ t.coutTotal | number:'1.0-0' }} DT</td>
+          <!-- ✅ Afficher "—" au lieu de 0 DT -->
+          <td>
+            <span *ngIf="t.coutMoyen > 0">{{ t.coutMoyen | number:'1.0-0' }} DT</span>
+            <span *ngIf="t.coutMoyen === 0" class="text-muted">—</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+    <!-- Tableau 3 : Moyenne multi-années -->
+    <div class="table-section" *ngIf="moyenneMultiAnnees">
+      <div class="table-header">
+        <h3><i class="fa fa-line-chart" aria-hidden="true"></i> Moyenne coût / blessé — {{ moyenneMultiAnnees.annees.join(' / ') }}</h3>
+        <span class="table-count">Toutes années disponibles</span>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table clickable-table">
+          <thead>
+            <tr>
+              <th>Tranche IPP</th>
+              <th>Moyenne (DT)</th>
+              <th>Tranche NBR-JR</th>
+              <th>Moyenne (DT)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of moyenneMultiAnnees.parIpp; let i = index">
+              <td><span class="badge-annee">{{ t.tranche }}</span></td>
+              <td>{{ t.moyenne | number:'1.0-0' }} DT</td>
+              <td>
+                <span class="badge-annee" *ngIf="moyenneMultiAnnees.parNbrJr[i]">
+                  {{ moyenneMultiAnnees.parNbrJr[i].tranche }}
+                </span>
+              </td>
+              <td>{{ moyenneMultiAnnees.parNbrJr[i]?.moyenne | number:'1.0-0' }} DT</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- TABLEAU STATISTIQUES PAR ANNÉE                            -->
+    <!-- ========================================================== -->
+
     <div class="table-section">
       <div class="table-header">
         <h3><i class="fa fa-table" aria-hidden="true"></i> Détail par année</h3>
-        <span class="table-count">{{ statsParAnnee.length }} années</span>
+        <span class="table-count">{{ statsParAnneeDisplay.length }} années</span>
       </div>
       <div class="table-wrapper">
         <table class="data-table">
@@ -272,7 +359,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let s of statsParAnnee">
+            <tr *ngFor="let s of statsParAnneeDisplay">
               <td>
                 <span class="badge-annee" [style.background-color]="getCouleurParAnnee(s.annee) + '33'" [style.color]="getCouleurParAnnee(s.annee)">
                   {{ s.annee }}
@@ -285,7 +372,7 @@
               <td>{{ s.rcmTotal | number:'1.0-0' }} DT</td>
             </tr>
           </tbody>
-          <tfoot *ngIf="statsParAnnee.length > 0">
+          <tfoot *ngIf="statsParAnneeDisplay.length > 0">
             <tr>
               <th>Total</th>
               <th>{{ getTotalGeneral('total') }}</th>

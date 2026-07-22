@@ -116,6 +116,40 @@ export interface EvolutionAnnuelle {
 }
 
 /* ============================================================= */
+/* INTERFACES "COÛT MOYEN PAR DOSSIER"                            */
+/* ============================================================= */
+
+export interface TrancheCoutMoyen {
+  tranche: string;
+  nbrBless: number;
+  nbrDos: number;
+  coutTotal: number;
+  coutMoyen: number;
+}
+
+export interface CoutMoyenDossier {
+  annee: number | 'TOUTES';
+  parIpp: TrancheCoutMoyen[];
+  parNbrJr: TrancheCoutMoyen[];
+  totalBless: number;
+  totalDos: number;
+  coutMoyenParBless: number;
+  coutMoyenParDos: number;
+}
+
+export interface TrancheMoyenneMultiAnnees {
+  tranche: string;
+  moyenne: number;
+  detailParAnnee: { annee: number; coutMoyen: number; nbrBless: number }[];
+}
+
+export interface MoyenneMultiAnnees {
+  annees: number[];
+  parIpp: TrancheMoyenneMultiAnnees[];
+  parNbrJr: TrancheMoyenneMultiAnnees[];
+}
+
+/* ============================================================= */
 /* STRUCTURE DES DONNÉES                                         */
 /* ============================================================= */
 
@@ -164,6 +198,20 @@ interface DonneeSinistre {
 export class StatistiquesService {
 
   private readonly apiUrl = 'http://localhost:8081/api/donnees-sinistres';
+
+  // ✅ Tranches IPP
+  private readonly bracketsIpp = [
+  { tranche: '1%-19%', test: (v: number) => v >= 1 && v <= 19 },
+  { tranche: '20%-79%', test: (v: number) => v >= 20 && v <= 79 },
+  { tranche: '80%-100%', test: (v: number) => v >= 80 && v <= 100 }
+];
+
+  // ✅ Tranches NBR-JR
+  private readonly bracketsJr = [
+    { tranche: '1J-45J', test: (v: number) => v >= 1 && v <= 45 },
+    { tranche: '60j-90j', test: (v: number) => v >= 60 && v <= 90 },
+    { tranche: '120j', test: (v: number) => v >= 120 }
+  ];
 
   constructor(private http: HttpClient) {}
 
@@ -237,7 +285,7 @@ export class StatistiquesService {
   }
 
   /* =========================================================== */
-  /* ANCIENNES MÉTHODES (conservées pour compatibilité)          */
+  /* ANCIENNES MÉTHODES                                           */
   /* =========================================================== */
 
   getStatsParAnnee(): Observable<StatsParAnnee[]> {
@@ -279,10 +327,10 @@ export class StatistiquesService {
           }
 
           const jours = this.versNombre(donnee.nbrJrs);
-          if (jours > 0) {
-            stat.sommeJours += jours;
-            stat.nombreJours++;
-          }
+if (jours > 0) {
+  stat.sommeJours += jours;
+  stat.nombreJours++;
+}
 
           stat.totalRcc += this.versNombre(donnee.rcc);
           stat.totalRcm += this.versNombre(donnee.rcm);
@@ -307,7 +355,7 @@ export class StatistiquesService {
       map((donnees: DonneeSinistre[]) => {
         const tranches = [
           { tranche: '1%-19%', min: 1, max: 19, count: 0 },
-          { tranche: '20%-79%', min: 20, max: 79, count: 0 },
+          { tranche: '20%-80%', min: 20, max: 79, count: 0 },
           { tranche: '80%-100%', min: 80, max: 100, count: 0 }
         ];
 
@@ -392,12 +440,111 @@ export class StatistiquesService {
   }
 
   /* =========================================================== */
-  /* MÉTHODES PRIVÉES                                            */
+  /* COÛT MOYEN PAR DOSSIER                                       */
+  /* =========================================================== */
+
+  getCoutMoyenDossier(annee: number | null = null): Observable<CoutMoyenDossier> {
+    return this.getAll().pipe(
+      map((donnees: DonneeSinistre[]) => this.calculerCoutMoyenPourAnnee(donnees, annee))
+    );
+  }
+
+  getMoyenneMultiAnnees(): Observable<MoyenneMultiAnnees> {
+    return this.getAll().pipe(
+      map((donnees: DonneeSinistre[]) => {
+        const annees = Array.from(new Set(
+          donnees.map(d => this.versNombre(d.annee)).filter(a => a >= 2020)
+        )).sort((a, b) => a - b);
+
+        const rapportsParAnnee = annees.map(a => ({
+          annee: a,
+          rapport: this.calculerCoutMoyenPourAnnee(donnees, a)
+        }));
+
+        const construireMoyenne = (
+          extraire: (r: CoutMoyenDossier) => TrancheCoutMoyen[]
+        ): TrancheMoyenneMultiAnnees[] => {
+          if (rapportsParAnnee.length === 0) return [];
+          const nbTranches = extraire(rapportsParAnnee[0].rapport).length;
+
+          return Array.from({ length: nbTranches }, (_, idx) => {
+            const tranche = extraire(rapportsParAnnee[0].rapport)[idx].tranche;
+            const detail = rapportsParAnnee.map(({ annee: a, rapport }) => {
+              const t = extraire(rapport)[idx];
+              return { annee: a, coutMoyen: t.coutMoyen, nbrBless: t.nbrBless };
+            });
+            const moyenne = detail.length > 0
+              ? Math.round(detail.reduce((s, d) => s + d.coutMoyen, 0) / detail.length)
+              : 0;
+            return { tranche, moyenne, detailParAnnee: detail };
+          });
+        };
+
+        return {
+          annees,
+          parIpp: construireMoyenne(r => r.parIpp),
+          parNbrJr: construireMoyenne(r => r.parNbrJr)
+        };
+      })
+    );
+  }
+
+  private calculerCoutMoyenPourAnnee(donnees: DonneeSinistre[], annee: number | null): CoutMoyenDossier {
+    const lignes = donnees.filter(d => {
+      const okAnnee = annee === null || this.versNombre(d.annee) === annee;
+      const ippBrut = d.ipp;
+      const aIpp = ippBrut !== null && ippBrut !== undefined && String(ippBrut).trim() !== '';
+      return okAnnee && aIpp;
+    });
+
+    const parIpp = this.bracketsIpp.map(b =>
+      this.calculerTranche(b.tranche, lignes, d => this.versNombre(d.ipp), b.test, true)
+    );
+    const parNbrJr = this.bracketsJr.map(b =>
+      this.calculerTranche(b.tranche, lignes, d => this.versNombre(d.nbrJrs), b.test, false)
+    );
+
+    const sinUniques = new Set(lignes.map(d => d.sin));
+    const totalBless = lignes.length;
+    const totalCout = lignes.reduce((s, d) => s + this.versNombre(d.rcc), 0);
+
+    return {
+      annee: annee ?? ('TOUTES' as const),
+      parIpp,
+      parNbrJr,
+      totalBless,
+      totalDos: sinUniques.size,
+      coutMoyenParBless: totalBless > 0 ? Math.round(totalCout / totalBless) : 0,
+      coutMoyenParDos: sinUniques.size > 0 ? Math.round(totalCout / sinUniques.size) : 0
+    };
+  }
+
+  private calculerTranche(
+    tranche: string,
+    lignes: DonneeSinistre[],
+    valeur: (d: DonneeSinistre) => number,
+    test: (v: number) => boolean,
+    calculerDos: boolean
+  ): TrancheCoutMoyen {
+    const sousEnsemble = lignes.filter(d => test(valeur(d)));
+    const cout = sousEnsemble.reduce((s, d) => s + this.versNombre(d.rcc), 0);
+    const nbrDos = calculerDos ? new Set(sousEnsemble.map(d => d.sin)).size : 0;
+
+    return {
+      tranche,
+      nbrBless: sousEnsemble.length,
+      nbrDos,
+      coutTotal: Math.round(cout),
+      coutMoyen: sousEnsemble.length > 0 ? Math.round(cout / sousEnsemble.length) : 0
+    };
+  }
+
+  /* =========================================================== */
+  /* MÉTHODES PRIVÉES — DASHBOARD                                */
   /* =========================================================== */
 
   private appliquerFiltres(donnees: DonneeSinistre[], filtres: DashboardFiltres): DonneeSinistre[] {
     return donnees.filter((donnee: DonneeSinistre) => {
-      // Recherche
       if (filtres.recherche.trim()) {
         const recherche = this.normaliserTexte(filtres.recherche);
         const sin = this.normaliserTexte(donnee.sin);
@@ -407,12 +554,10 @@ export class StatistiquesService {
         }
       }
 
-      // Année
       if (filtres.annee !== null && this.versNombre(donnee.annee) !== filtres.annee) {
         return false;
       }
 
-      // Utilisateur
       if (filtres.utilisateurId !== null) {
         const userId = donnee.utilisateurId ?? donnee.proprietaireId ?? donnee.gestionnaireId;
         if (userId !== null && userId !== undefined && userId !== filtres.utilisateurId) {
@@ -420,22 +565,18 @@ export class StatistiquesService {
         }
       }
 
-      // Région
       if (filtres.region && this.normaliserTexte(donnee.region) !== this.normaliserTexte(filtres.region)) {
         return false;
       }
 
-      // Nature
       if (filtres.nature && this.normaliserNature(donnee.natureAff || donnee.nature) !== this.normaliserNature(filtres.nature)) {
         return false;
       }
 
-      // Statut
       if (filtres.statut && this.normaliserTexte(donnee.statut) !== this.normaliserTexte(filtres.statut)) {
         return false;
       }
 
-      // Niveau d'alerte
       if (filtres.niveauAlerte) {
         const niveau = this.normaliserTexte(donnee.niveauAlerte);
         if (filtres.niveauAlerte === 'AUCUNE') {
@@ -445,7 +586,6 @@ export class StatistiquesService {
         }
       }
 
-      // IPP min/max
       const ipp = this.versNombre(donnee.ipp);
       if (filtres.ippMin !== null && ipp < filtres.ippMin) return false;
       if (filtres.ippMax !== null && ipp > filtres.ippMax) return false;
@@ -472,43 +612,35 @@ export class StatistiquesService {
       const statut = this.normaliserTexte(donnee.statut);
       const niveauAlerte = this.normaliserTexte(donnee.niveauAlerte);
 
-      // Statut
       if (statut === 'CLOTURE' || statut === 'CLOTUREE') {
         dossiersClotures++;
       } else {
         dossiersActifs++;
       }
 
-      // IPP
       if (ipp > 0 && ipp <= 100) {
         sommeIpp += ipp;
         nombreIpp++;
       }
 
-      // Jours
       if (jours > 0) {
         sommeJours += jours;
         nombreJours++;
       }
 
-      // Règlements
       totalRcc += this.versNombre(donnee.rcc);
       totalRcm += this.versNombre(donnee.rcm);
       totalReglements += this.calculerReglements(donnee);
 
-      // Tiers
       if (!tiers) dossiersSansTiers++;
 
-      // Incomplets
       if (!sin || !tiers || ipp <= 0 || jours <= 0) {
         dossiersIncomplets++;
       }
 
-      // Alertes
       if (niveauAlerte === 'CRITIQUE') alertesCritiques++;
       if (niveauAlerte === 'URGENTE') alertesUrgentes++;
 
-      // Occurrences
       if (sin) {
         occurrencesSinistre.set(sin, (occurrencesSinistre.get(sin) || 0) + 1);
         nombreChampsComplets++;
@@ -692,7 +824,6 @@ export class StatistiquesService {
       const ipp = this.versNombre(donnee.ipp);
       const jours = this.versNombre(donnee.nbrJrs);
 
-      // Alertes de niveau
       if (niveau === 'CRITIQUE' || niveau === 'URGENTE' || niveau === 'SURVEILLANCE') {
         priorites.push({
           id: donnee.id,
@@ -710,7 +841,6 @@ export class StatistiquesService {
         });
       }
 
-      // Tiers manquant
       if (!tiers) {
         priorites.push({
           id: donnee.id,
@@ -723,7 +853,6 @@ export class StatistiquesService {
         });
       }
 
-      // IPP manquant
       if (ipp <= 0) {
         priorites.push({
           id: donnee.id,
@@ -737,7 +866,6 @@ export class StatistiquesService {
         });
       }
 
-      // Jours manquants
       if (jours <= 0) {
         priorites.push({
           id: donnee.id,
@@ -763,21 +891,21 @@ export class StatistiquesService {
   // ============================================================
 
   private calculerReglements(donnee: DonneeSinistre): number {
-  const valeurs: number[] = [
-    this.versNombre(donnee.regRcc),
-    this.versNombre(donnee.regRcm),
-    this.versNombre(donnee.regDommagesVehicules),
-    this.versNombre(donnee.regBrisGlaces),
-    this.versNombre(donnee.regDomCollision),
-    this.versNombre(donnee.regDommage),
-    this.versNombre(donnee.regVol),
-    this.versNombre(donnee.regInc),
-    this.versNombre(donnee.regAfp),
-    this.versNombre(donnee.regAux)
-  ];
-  
-  return valeurs.reduce((somme: number, val: number) => somme + val, 0);
-}
+    const valeurs: number[] = [
+      this.versNombre(donnee.regRcc),
+      this.versNombre(donnee.regRcm),
+      this.versNombre(donnee.regDommagesVehicules),
+      this.versNombre(donnee.regBrisGlaces),
+      this.versNombre(donnee.regDomCollision),
+      this.versNombre(donnee.regDommage),
+      this.versNombre(donnee.regVol),
+      this.versNombre(donnee.regInc),
+      this.versNombre(donnee.regAfp),
+      this.versNombre(donnee.regAux)
+    ];
+
+    return valeurs.reduce((somme: number, val: number) => somme + val, 0);
+  }
 
   private versNombre(valeur: number | string | null | undefined): number {
     if (valeur === null || valeur === undefined || valeur === '') return 0;

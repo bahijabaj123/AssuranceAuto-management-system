@@ -101,11 +101,9 @@ export class RechercheDossierComponent {
       }).pipe(catchError(() => of([]))),
       
       // ✅ RECHERCHE DANS DONNEES_SINISTRES (par sin ET par nom_tiers)
-      donneesSinistres: this.http.get<any[]>(`${this.api}/donnees-sinistres/search`, {
-  params: new HttpParams()
-    .set('sin', num)
-    .set('nomTiers', num)  //  AJOUTER nomTiers
-}).pipe(catchError(() => of([])))
+       donneesSinistres: this.http.get<any[]>(`${this.api}/donnees-sinistres/search`, {
+      params: new HttpParams().set('sin', num)  // ✅ UNIQUEMENT par sin
+    }).pipe(catchError(() => of([])))
     }).subscribe({
       next: (data) => {
         const suiviList = data.suivi || [];

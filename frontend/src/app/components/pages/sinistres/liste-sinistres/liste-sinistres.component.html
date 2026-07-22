@@ -8,6 +8,10 @@
       <p class="subtitle">
         Gestion des données IPP — 
         <span class="count">{{ filteredSinistres.length }} enregistrements</span>
+        <span *ngIf="hasActiveFilters()" class="filters-badge">
+          <i class="fa fa-filter" aria-hidden="true"></i>
+          {{ getActiveFiltersCount() }} filtre(s) actif(s)
+        </span>
       </p>
     </div>
     <div class="header-actions">
@@ -41,27 +45,14 @@
 
   <!-- FILTRES -->
   <div class="filters-section">
-    <!-- Ligne 1 -->
     <div class="filters-row">
       <div class="filter-group">
         <label><i class="fa fa-search" aria-hidden="true"></i> N° SIN</label>
-        <input 
-          type="text" 
-          class="filter-input" 
-          [(ngModel)]="searchSin" 
-          (ngModelChange)="applyFilters()" 
-          placeholder="Ex: 20232800537"
-        />
+        <input type="text" class="filter-input" [(ngModel)]="searchSin" (ngModelChange)="applyFilters()" placeholder="Ex: 20232800537"/>
       </div>
-       <div class="filter-group">
+      <div class="filter-group">
         <label><i class="fa fa-user" aria-hidden="true"></i> Tiers</label>
-        <input 
-          type="text" 
-          class="filter-input" 
-          [(ngModel)]="searchTiers" 
-          (ngModelChange)="applyFilters()" 
-          placeholder="Nom du tiers"
-        />
+        <input type="text" class="filter-input" [(ngModel)]="searchTiers" (ngModelChange)="applyFilters()" placeholder="Nom du tiers"/>
       </div>
       <div class="filter-group">
         <label>📅 Année</label>
@@ -72,13 +63,7 @@
       </div>
       <div class="filter-group">
         <label>📊 IPP (%)</label>
-        <input 
-          type="text" 
-          class="filter-input" 
-          [(ngModel)]="searchIpp" 
-          (ngModelChange)="applyFilters()" 
-          placeholder="Ex: 28"
-        />
+        <input type="text" class="filter-input" [(ngModel)]="searchIpp" (ngModelChange)="applyFilters()" placeholder="Ex: 28"/>
       </div>
       <div class="filter-group actions">
         <button class="btn-reset" (click)="resetFilters()">
@@ -87,38 +72,35 @@
       </div>
     </div>
 
-    <!-- Ligne 2 : NBR JRS Range -->
     <div class="filters-row">
       <div class="filter-group range">
         <label>📆 NBR JRS (Min → Max)</label>
         <div class="range-inputs">
-          <input 
-            type="number" 
-            class="filter-input range-input" 
-            [(ngModel)]="nbrJrsMin" 
-            (ngModelChange)="applyFilters()" 
-            placeholder="Min"
-            min="0"
-          />
+          <input type="number" class="filter-input range-input" [(ngModel)]="nbrJrsMin" (ngModelChange)="applyFilters()" placeholder="Min" min="0"/>
           <span class="range-separator">→</span>
-          <input 
-            type="number" 
-            class="filter-input range-input" 
-            [(ngModel)]="nbrJrsMax" 
-            (ngModelChange)="applyFilters()" 
-            placeholder="Max"
-            min="0"
-          />
+          <input type="number" class="filter-input range-input" [(ngModel)]="nbrJrsMax" (ngModelChange)="applyFilters()" placeholder="Max" min="0"/>
         </div>
       </div>
-      <div class="filter-group">
-        <!-- Espace pour équilibrer -->
+      <div class="filter-group" *ngIf="trancheIppFiltre">
+        <label>📊 Tranche IPP</label>
+        <div class="filter-tag">
+          <span>{{ getLibelleTrancheIpp(trancheIppFiltre) }}</span>
+          <button class="btn-remove-filter" (click)="trancheIppFiltre = null; applyFilters()">
+            <i class="fa fa-times" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
-      <div class="filter-group">
-        <!-- Espace pour équilibrer -->
+      <div class="filter-group" *ngIf="trancheNbrJrFiltre">
+        <label>📊 Tranche NBR-JR</label>
+        <div class="filter-tag">
+          <span>{{ getLibelleTrancheNbrJr(trancheNbrJrFiltre) }}</span>
+          <button class="btn-remove-filter" (click)="trancheNbrJrFiltre = null; applyFilters()">
+            <i class="fa fa-times" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
-      <div class="filter-group">
-        <!-- Espace pour équilibrer -->
+      <div class="filter-group actions">
+        <!-- Espace -->
       </div>
     </div>
   </div>
@@ -130,65 +112,72 @@
   </div>
 
   <!-- TABLEAU -->
-<div *ngIf="!isLoading">
-  <div *ngIf="filteredSinistres.length === 0" class="empty-state">
-    <i class="fa fa-inbox" aria-hidden="true"></i>
-    <p>Aucun sinistre trouvé</p>
-  </div>
+  <div *ngIf="!isLoading">
+    <div *ngIf="filteredSinistres.length === 0" class="empty-state">
+      <i class="fa fa-inbox" aria-hidden="true"></i>
+      <p>Aucun sinistre trouvé</p>
+      <button class="btn-reset" (click)="resetFilters()" *ngIf="hasActiveFilters()">
+        <i class="fa fa-refresh" aria-hidden="true"></i> Réinitialiser les filtres
+      </button>
+    </div>
 
-  <div *ngIf="filteredSinistres.length > 0" class="table-wrapper">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>SIN</th>
-          <th>Tiers</th>
-          <th>Année</th>
-          <th>IPP (%)</th>
-          <th>NBR JRS</th>
-          <th>RCC</th>
-          <th>RCM</th>
-          <th>DOMMAGE</th>
-          <th>VOL</th>
-          <th>INC</th>
-          <th class="actions-col">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let d of paginatedSinistres">
-          <td><span class="num-sin">{{ d.sin }}</span></td>
-          <td>
-            <!-- ✅ AFFICHAGE CORRIGÉ -->
-            <span *ngIf="d.nomTiers && d.nomTiers !== ''" class="badge-tiers">
-              <i class="fa fa-user" aria-hidden="true"></i> {{ d.nomTiers }}
-            </span>
-            <span *ngIf="!d.nomTiers || d.nomTiers === ''" class="text-muted">—</span>
-          </td>
-          <td><span class="badge-annee">{{ d.annee }}</span></td>
-          <td>
-            <span *ngIf="d.ipp" class="badge-ipp">{{ d.ipp }}%</span>
-            <span *ngIf="!d.ipp" class="text-muted">—</span>
-          </td>
-          <td>
-            <span *ngIf="d.nbrJrs" class="badge-jrs">{{ d.nbrJrs }}</span>
-            <span *ngIf="!d.nbrJrs" class="text-muted">—</span>
-          </td>
-          <td>{{ d.rcc || '—' }}</td>
-          <td>{{ d.rcm || '—' }}</td>
-          <td>{{ d.dommage || '—' }}</td>
-          <td>{{ d.vol || '—' }}</td>
-          <td>{{ d.inc || '—' }}</td>
-          <td class="actions">
-            <button class="btn-edit" title="Modifier" (click)="modifierSinistre(d.id)">
-              <i class="fa fa-pencil" aria-hidden="true"></i>
-            </button>
-            <button class="btn-delete" title="Supprimer" (click)="supprimerSinistre(d.id, d.sin)">
-              <i class="fa fa-trash-o" aria-hidden="true"></i>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-</div>
+    <div *ngIf="filteredSinistres.length > 0" class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>SIN</th>
+            <th>Tiers</th>
+            <th>Année</th>
+            <th>IPP (%)</th>
+            <th>NBR JRS</th>
+            <th>RCC</th>
+            <th>RCM</th>
+            <th>DOMMAGE</th>
+            <th>VOL</th>
+            <th>INC</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of paginatedSinistres">
+            <td>
+              <a class="num-sin-link" (click)="voirDetails(d.id)" title="Voir les détails du sinistre">
+                <span class="num-sin">{{ d.sin }}</span>
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+              </a>
+            </td>
+            <td>
+              <span *ngIf="d.nomTiers && d.nomTiers !== ''" class="badge-tiers">
+                <i class="fa fa-user" aria-hidden="true"></i> {{ d.nomTiers }}
+              </span>
+              <span *ngIf="!d.nomTiers || d.nomTiers === ''" class="text-muted">—</span>
+            </td>
+            <td><span class="badge-annee">{{ d.annee }}</span></td>
+            <td>
+              <span *ngIf="d.ipp" class="badge-ipp">{{ d.ipp }}%</span>
+              <span *ngIf="!d.ipp" class="text-muted">—</span>
+            </td>
+            <td>
+              <span *ngIf="d.nbrJrs" class="badge-jrs">{{ d.nbrJrs }}</span>
+              <span *ngIf="!d.nbrJrs" class="text-muted">—</span>
+            </td>
+            <td>{{ d.rcc || '—' }}</td>
+            <td>{{ d.rcm || '—' }}</td>
+            <td>{{ d.dommage || '—' }}</td>
+            <td>{{ d.vol || '—' }}</td>
+            <td>{{ d.inc || '—' }}</td>
+            <td class="actions">
+              <button class="btn-edit" title="Modifier" (click)="modifierSinistre(d.id)">
+                <i class="fa fa-pencil" aria-hidden="true"></i>
+              </button>
+              <button class="btn-delete" title="Supprimer" (click)="supprimerSinistre(d.id, d.sin)">
+                <i class="fa fa-trash-o" aria-hidden="true"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Pagination -->
     <div *ngIf="filteredSinistres.length > itemsPerPage" class="pagination">

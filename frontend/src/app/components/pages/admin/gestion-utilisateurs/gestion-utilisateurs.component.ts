@@ -7,6 +7,8 @@ import { UtilisateurService } from '../../../../services/utilisateur.service';
 import { ToastService } from '../../../../services/toast.service';
 import { ModalService } from '../../../../services/modal.service';
 import { AuthService } from '../../../../services/auth.service';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-gestion-utilisateurs',
@@ -33,7 +35,8 @@ export class GestionUtilisateursComponent implements OnInit {
     private utilisateurService: UtilisateurService,
     private toastService: ToastService,
     private modalService: ModalService,
-    private authService: AuthService
+    private authService: AuthService,
+     private router: Router
   ) {}
 
   ngOnInit() {
@@ -189,4 +192,12 @@ export class GestionUtilisateursComponent implements OnInit {
       }
     });
   }
+ 
+// ✅ AJOUTER LA MÉTHODE
+ajouterUtilisateur() {
+  // ✅ Rediriger vers le formulaire d'inscription
+  this.router.navigate(['/register']);
+}
+
+
 }

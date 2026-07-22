@@ -4,10 +4,18 @@ import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, ChangeDetector
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { Chart, registerables } from 'chart.js';
-import { StatistiquesService, StatsParAnnee, RepartitionIPP, EvolutionAnnuelle } from '../../../../services/statistiques.service';
+import { Chart, registerables, ChartEvent, ActiveElement } from 'chart.js';
+import {
+  StatistiquesService,
+  StatsParAnnee,
+  RepartitionIPP,
+  EvolutionAnnuelle,
+  CoutMoyenDossier,
+  MoyenneMultiAnnees
+} from '../../../../services/statistiques.service';
 import { DonneesSinistreService } from '../../../../services/donnees-sinistre.service';
 import { ToastService } from '../../../../services/toast.service';
+import * as XLSX from 'xlsx';
 
 Chart.register(...registerables);
 
@@ -28,14 +36,23 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
 
   isLoading = true;
   statsParAnnee: StatsParAnnee[] = [];
+  statsParAnneeFiltrees: StatsParAnnee[] = [];
   repartitionIPP: RepartitionIPP[] = [];
   evolutionAnnuelle: EvolutionAnnuelle[] = [];
+  evolutionAnnuelleFiltree: EvolutionAnnuelle[] = [];
   globalStats: any = {};
+  globalStatsFiltrees: any = {};
   topSinistres: any[] = [];
+  topSinistresFiltres: any[] = [];
   derniersSinistres: any[] = [];
   anneesDisponibles: number[] = [];
   anneeFiltre: number | null = null;
   searchTerm: string = '';
+  allSinistres: any[] = [];
+
+  // ✅ Coût moyen par dossier
+  coutMoyenDossier: CoutMoyenDossier | null = null;
+  moyenneMultiAnnees: MoyenneMultiAnnees | null = null;
 
   // ✅ Couleurs personnalisées par année
   couleursParAnnee: { [key: number]: string } = {
@@ -49,9 +66,6 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
     2029: '#34495e',
     2030: '#2c3e50'
   };
-
-  // ✅ Couleurs des graphiques
-  colors = ['#3498db', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6', '#1abc9c', '#e67e22', '#34495e'];
 
   // ✅ Charts
   private chartEvolution: Chart | null = null;
@@ -70,8 +84,6 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.chargerDonnees();
-    this.chargerTopSinistres();
-    this.chargerDerniersSinistres();
   }
 
   ngAfterViewInit() {
@@ -89,23 +101,25 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
       this.statistiquesService.getStatsParAnnee().toPromise(),
       this.statistiquesService.getRepartitionIPP().toPromise(),
       this.statistiquesService.getEvolutionAnnuelle().toPromise(),
-      this.statistiquesService.getGlobalStats().toPromise()
-    ]).then(([statsParAnnee, repartitionIPP, evolutionAnnuelle, globalStats]) => {
+      this.statistiquesService.getGlobalStats().toPromise(),
+      this.sinistreService.getAll().toPromise(),
+      this.statistiquesService.getMoyenneMultiAnnees().toPromise()
+    ]).then(([statsParAnnee, repartitionIPP, evolutionAnnuelle, globalStats, sinistres, moyenneMultiAnnees]) => {
       this.statsParAnnee = statsParAnnee || [];
       this.repartitionIPP = repartitionIPP || [];
       this.evolutionAnnuelle = evolutionAnnuelle || [];
       this.globalStats = globalStats || {};
+      this.allSinistres = sinistres || [];
+      this.moyenneMultiAnnees = moyenneMultiAnnees || null;
 
       // ✅ Extraire les années disponibles
       this.anneesDisponibles = this.statsParAnnee.map(s => s.annee).sort((a, b) => a - b);
 
+      // ✅ Appliquer les filtres initiaux
+      this.appliquerFiltresEtMettreAJour();
+
       this.isLoading = false;
       this.cdr.detectChanges();
-
-      // ✅ Créer les graphiques après le chargement
-      setTimeout(() => {
-        this.creerGraphiques();
-      }, 300);
 
     }).catch((err) => {
       console.error('❌ Erreur:', err);
@@ -114,56 +128,100 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
     });
   }
 
-  chargerTopSinistres() {
-    this.sinistreService.getAll().subscribe({
-      next: (data) => {
-        // ✅ Top 5 par RCC
-        this.topSinistres = data
-          .filter(s => s.rcc && s.rcc > 0)
-          .sort((a, b) => (b.rcc || 0) - (a.rcc || 0))
-          .slice(0, 5);
-        console.log('🏆 Top 5 sinistres:', this.topSinistres);
+  // ============================================================
+  // FILTRES DYNAMIQUES
+  // ============================================================
+
+  appliquerFiltresEtMettreAJour() {
+    // ✅ Filtrer les stats par année
+    if (this.anneeFiltre) {
+      this.statsParAnneeFiltrees = this.statsParAnnee.filter(s => s.annee === this.anneeFiltre);
+      this.evolutionAnnuelleFiltree = this.evolutionAnnuelle.filter(e => e.annee === this.anneeFiltre);
+
+      // ✅ Filtrer les sinistres pour le top et les récents
+      this.topSinistresFiltres = this.allSinistres
+        .filter(s => s.annee === this.anneeFiltre && s.rcc && s.rcc > 0)
+        .sort((a, b) => (b.rcc || 0) - (a.rcc || 0))
+        .slice(0, 5);
+
+      // ✅ Recalculer les stats globales pour l'année filtrée
+      const sinistresFiltres = this.allSinistres.filter(s => s.annee === this.anneeFiltre);
+      this.globalStatsFiltrees = this.calculerStatsGlobales(sinistresFiltres);
+
+    } else {
+      this.statsParAnneeFiltrees = this.statsParAnnee;
+      this.evolutionAnnuelleFiltree = this.evolutionAnnuelle;
+      this.topSinistresFiltres = this.allSinistres
+        .filter(s => s.rcc && s.rcc > 0)
+        .sort((a, b) => (b.rcc || 0) - (a.rcc || 0))
+        .slice(0, 5);
+      this.globalStatsFiltrees = this.globalStats;
+    }
+
+    // ✅ Mettre à jour les derniers sinistres
+    this.derniersSinistres = this.allSinistres
+      .sort((a, b) => (b.id || 0) - (a.id || 0))
+      .slice(0, 5);
+
+    // ✅ Recalculer le coût moyen par dossier
+    this.statistiquesService.getCoutMoyenDossier(this.anneeFiltre).subscribe({
+      next: (res) => {
+        this.coutMoyenDossier = res;
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('❌ Erreur top sinistres:', err);
+        console.error('❌ Erreur coût moyen dossier:', err);
       }
     });
+
+    // ✅ Recréer les graphiques
+    setTimeout(() => {
+      this.creerGraphiques();
+    }, 300);
   }
 
-  chargerDerniersSinistres() {
-    this.sinistreService.getAll().subscribe({
-      next: (data) => {
-        // ✅ Derniers sinistres (par date de création ou ID)
-        this.derniersSinistres = data
-          .sort((a, b) => (b.id || 0) - (a.id || 0))
-          .slice(0, 5);
-        console.log('⏰ Derniers sinistres:', this.derniersSinistres);
-      },
-      error: (err) => {
-        console.error('❌ Erreur derniers sinistres:', err);
+  calculerStatsGlobales(sinistres: any[]): any {
+    let sommeIpp = 0, nombreIpp = 0;
+    let sommeJours = 0, nombreJours = 0;
+    let totalRcc = 0, totalRcm = 0, totalReglements = 0;
+
+    sinistres.forEach(s => {
+      const ipp = parseFloat(s.ipp) || 0;
+      if (ipp > 0 && ipp <= 100) {
+        sommeIpp += ipp;
+        nombreIpp++;
       }
-    });
-  }
 
-  // ============================================================
-  // FILTRES ET RECHERCHE
-  // ============================================================
+      const jours = parseInt(s.nbrJrs) || 0;
+      if (jours > 0) {
+        sommeJours += jours;
+        nombreJours++;
+      }
+
+      totalRcc += parseFloat(s.rcc) || 0;
+      totalRcm += parseFloat(s.rcm) || 0;
+      totalReglements += (parseFloat(s.rcc) || 0) + (parseFloat(s.rcm) || 0);
+    });
+
+    return {
+      total: sinistres.length,
+      ippMoyen: nombreIpp > 0 ? Math.round((sommeIpp / nombreIpp) * 10) / 10 : 0,
+      nbrJrsMoyen: nombreJours > 0 ? Math.round((sommeJours / nombreJours) * 10) / 10 : 0,
+      rccTotal: Math.round(totalRcc),
+      rcmTotal: Math.round(totalRcm),
+      totalReglements: Math.round(totalReglements),
+      avecIpp: nombreIpp,
+      avecNbrJrs: nombreJours
+    };
+  }
 
   appliquerFiltre() {
-    // ✅ Filtrer les données par année
-    if (this.anneeFiltre) {
-      // Recharger avec le filtre
-      this.isLoading = true;
-      this.statistiquesService.getStatsParAnnee().toPromise().then((data) => {
-        this.statsParAnnee = (data || []).filter(s => s.annee === this.anneeFiltre);
-        this.isLoading = false;
-        this.cdr.detectChanges();
-        setTimeout(() => this.creerGraphiques(), 300);
-      });
-    } else {
-      this.chargerDonnees();
-    }
+    this.appliquerFiltresEtMettreAJour();
   }
+
+  // ============================================================
+  // RECHERCHE
+  // ============================================================
 
   rechercherSinistre(term: string) {
     if (!term || term.trim() === '') {
@@ -174,20 +232,60 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
   }
 
   // ============================================================
+  // NAVIGATION
+  // ============================================================
+
+  naviguerVersListe(queryParams: any = {}) {
+    if (this.anneeFiltre) {
+      queryParams.annee = this.anneeFiltre;
+    }
+    this.router.navigate(['/sinistres'], { queryParams });
+  }
+
+  naviguerParAnnee(annee: number) {
+    this.router.navigate(['/sinistres'], { queryParams: { annee: annee } });
+  }
+
+  naviguerParTrancheIPP(tranche: string) {
+    this.router.navigate(['/sinistres'], { queryParams: { trancheIpp: tranche } });
+  }
+
+  naviguerParTrancheNbrJr(tranche: string) {
+    this.router.navigate(['/sinistres'], { 
+      queryParams: { 
+        trancheNbrJr: tranche,
+        annee: this.anneeFiltre || undefined 
+      } 
+    });
+  }
+
+  naviguerParNature(nature: string) {
+    this.router.navigate(['/sinistres'], { queryParams: { nature: nature } });
+  }
+
+  naviguerVersSinistre(id: number | undefined) {
+    if (!id) {
+      this.toastService.warning('Sinistre non trouvé');
+      return;
+    }
+    this.router.navigate(['/sinistres/formulaire', id]);
+  }
+
+  // ============================================================
   // TENDANCES
   // ============================================================
 
   getTendance(champ: string): 'up' | 'down' | 'stable' {
-    const valeurs = this.statsParAnnee.map(s => {
+    const valeurs = this.statsParAnneeFiltrees.map(s => {
       const val = s[champ as keyof StatsParAnnee];
       return typeof val === 'number' ? val : 0;
     }).filter(v => v > 0);
-    
+
     if (valeurs.length < 2) return 'stable';
-    
+
     const derniere = valeurs[valeurs.length - 1];
     const avantDerniere = valeurs[valeurs.length - 2];
-    
+
     if (derniere > avantDerniere * 1.02) return 'up';
     if (derniere < avantDerniere * 0.98) return 'down';
     return 'stable';
@@ -208,7 +306,7 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
   }
 
   // ============================================================
-  // COULEURS PAR ANNÉE
+  // COULEURS
   // ============================================================
 
   getCouleurParAnnee(annee: number): string {
@@ -216,43 +314,98 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
   }
 
   // ============================================================
-  // EXPORTATION
+  // EXPORTATION EXCEL
   // ============================================================
 
   exporterDashboardComplet() {
-    const data = {
-      dateExport: new Date().toISOString(),
-      statistiques: this.statsParAnnee,
-      repartitionIPP: this.repartitionIPP,
-      evolution: this.evolutionAnnuelle,
-      globalStats: this.globalStats,
-      topSinistres: this.topSinistres,
-      derniersSinistres: this.derniersSinistres
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `dashboard-carte-${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-    
-    this.toastService.success('✅ Dashboard exporté avec succès');
+    try {
+      const dataExport: any = {
+        'Statistiques par année': this.statsParAnneeDisplay.map(s => ({
+          'Année': s.annee,
+          'Total sinistres': s.total,
+          'IPP Moyen (%)': s.ippMoyen,
+          'NBR JRS Moyen': s.nbrJrsMoyen,
+          'RCC Total (DT)': s.rccTotal,
+          'RCM Total (DT)': s.rcmTotal
+        })),
+        'Répartition IPP': this.repartitionIPP.map(r => ({
+          'Tranche': r.tranche,
+          'Nombre': r.count,
+          'Pourcentage (%)': r.pourcentage
+        })),
+        'Top 5 Sinistres': this.topSinistresDisplay.map((s, i) => ({
+          'Rang': i + 1,
+          'SIN': s.sin,
+          'Tiers': s.nomTiers || '—',
+          'RCC (DT)': s.rcc || 0,
+          'RCM (DT)': s.rcm || 0,
+          'IPP (%)': s.ipp || '—',
+          'NBR JRS': s.nbrJrs || '—'
+        })),
+        'Résumé Global': [{
+          'Total sinistres': this.globalStatsDisplay.total || 0,
+          'IPP Moyen (%)': this.globalStatsDisplay.ippMoyen || 0,
+          'NBR JRS Moyen': this.globalStatsDisplay.nbrJrsMoyen || 0,
+          'Total RCC (DT)': this.globalStatsDisplay.rccTotal || 0,
+          'Total RCM (DT)': this.globalStatsDisplay.rcmTotal || 0,
+          'Total Règlements (DT)': this.globalStatsDisplay.totalReglements || 0,
+          'Avec IPP': this.globalStatsDisplay.avecIpp || 0
+        }]
+      };
+
+      if (this.coutMoyenDossier) {
+        dataExport['Coût moyen - Tranche IPP'] = this.coutMoyenDossier.parIpp.map(t => ({
+          'Tranche IPP': t.tranche,
+          'Nbr blessés': t.nbrBless,
+          'Nbr dossiers': t.nbrDos,
+          'Coût total (DT)': t.coutTotal,
+          'Coût moyen / blessé (DT)': t.coutMoyen
+        }));
+
+        dataExport['Coût moyen - Tranche NBR-JR'] = this.coutMoyenDossier.parNbrJr.map(t => ({
+          'Tranche NBR-JR': t.tranche,
+          'Nbr blessés': t.nbrBless,
+          'Coût total (DT)': t.coutTotal,
+          'Coût moyen (DT)': t.coutMoyen
+        }));
+      }
+
+      if (this.moyenneMultiAnnees) {
+        dataExport['Moyenne multi-années'] = this.moyenneMultiAnnees.parIpp.map((t, i) => ({
+          'Tranche IPP': t.tranche,
+          'Moyenne IPP (DT)': t.moyenne,
+          'Tranche NBR-JR': this.moyenneMultiAnnees!.parNbrJr[i]?.tranche || '',
+          'Moyenne NBR-JR (DT)': this.moyenneMultiAnnees!.parNbrJr[i]?.moyenne || 0
+        }));
+      }
+
+      const wb = XLSX.utils.book_new();
+
+      Object.entries(dataExport).forEach(([nomFeuille, donnees]) => {
+        const lignes = donnees as any[];
+        if (lignes && lignes.length > 0) {
+          const ws = XLSX.utils.json_to_sheet(lignes);
+          XLSX.utils.book_append_sheet(wb, ws, nomFeuille);
+
+          const colWidths = Object.keys(lignes[0]).map(key => ({
+            wch: Math.max(key.length, 15)
+          }));
+          ws['!cols'] = colWidths;
+        }
+      });
+
+      const nomFichier = `dashboard-carte-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      XLSX.writeFile(wb, nomFichier);
+
+      this.toastService.success('✅ Dashboard exporté avec succès en Excel');
+    } catch (error) {
+      console.error('❌ Erreur export:', error);
+      this.toastService.error('❌ Erreur lors de l\'export du dashboard', 4000);
+    }
   }
 
   // ============================================================
-  // NAVIGATION
-  // ============================================================
-
-  naviguerVersSinistres() {
-    this.router.navigate(['/sinistres']);
-  }
-
-  // ============================================================
-  // GRAPHIQUES
+  // GRAPHIQUES AVEC CLICK
   // ============================================================
 
   creerGraphiques() {
@@ -264,32 +417,30 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
     this.creerGraphiqueReglements();
   }
 
-  // ✅ Graphique 1 : Évolution des sinistres (courbe)
   creerGraphiqueEvolution() {
     if (!this.chartEvolutionRef) return;
 
     const ctx = this.chartEvolutionRef.nativeElement.getContext('2d');
-    const annees = this.evolutionAnnuelle.map(e => e.annee);
-    const totals = this.evolutionAnnuelle.map(e => e.total);
+    const donneesTriees = [...this.evolutionAnnuelleFiltree].sort((a, b) => a.annee - b.annee);
+    const annees = donneesTriees.map(e => e.annee);
+    const totals = donneesTriees.map(e => e.total);
 
     this.chartEvolution = new Chart(ctx, {
       type: 'line',
       data: {
         labels: annees,
-        datasets: [
-          {
-            label: 'Nombre de sinistres',
-            data: totals,
-            borderColor: '#3498db',
-            backgroundColor: 'rgba(52, 152, 219, 0.1)',
-            fill: true,
-            tension: 0.4,
-            pointBackgroundColor: annees.map(a => this.getCouleurParAnnee(a)),
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 6
-          }
-        ]
+        datasets: [{
+          label: 'Nombre de sinistres',
+          data: totals,
+          borderColor: '#3498db',
+          backgroundColor: 'rgba(52, 152, 219, 0.1)',
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: annees.map(a => this.getCouleurParAnnee(a)),
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6
+        }]
       },
       options: {
         responsive: true,
@@ -298,19 +449,23 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
           tooltip: {
             callbacks: {
               label: function(context) {
-                return `Sinistres: ${context.parsed.y}`;
+                const index = context.dataIndex;
+                return `${annees[index]} : ${context.parsed.y} sinistres`;
               }
             }
           }
         },
-        scales: {
-          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+        onClick: (event: ChartEvent, elements: ActiveElement[]) => {
+          if (elements.length > 0) {
+            const index = elements[0].index;
+            this.naviguerParAnnee(annees[index]);
+          }
         }
       }
     });
   }
 
-  // ✅ Graphique 2 : Répartition IPP (camembert)
   creerGraphiqueRepartition() {
     if (!this.chartRepartitionRef) return;
 
@@ -344,18 +499,25 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
               }
             }
           }
+        },
+        onClick: (event: ChartEvent, elements: ActiveElement[]) => {
+          if (elements.length > 0) {
+            const index = elements[0].index;
+            this.naviguerParTrancheIPP(labels[index]);
+          }
         }
       }
     });
   }
 
-  // ✅ Graphique 3 : IPP Moyen par année (barres)
   creerGraphiqueIppMoyen() {
     if (!this.chartIppMoyenRef) return;
 
     const ctx = this.chartIppMoyenRef.nativeElement.getContext('2d');
-    const annees = this.statsParAnnee.map(s => s.annee);
-    const ippMoyen = this.statsParAnnee.map(s => s.ippMoyen);
+    const donneesTriees = [...this.statsParAnneeFiltrees].sort((a, b) => a.annee - b.annee);
+    const annees = donneesTriees.map(s => s.annee);
+    const ippMoyen = donneesTriees.map(s => s.ippMoyen);
+    const couleurs = donneesTriees.map(s => this.getCouleurParAnnee(s.annee));
 
     this.chartIppMoyen = new Chart(ctx, {
       type: 'bar',
@@ -364,8 +526,8 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
         datasets: [{
           label: 'IPP Moyen (%)',
           data: ippMoyen,
-          backgroundColor: annees.map(a => this.getCouleurParAnnee(a) + 'CC'),
-          borderColor: annees.map(a => this.getCouleurParAnnee(a)),
+          backgroundColor: couleurs.map(c => c + 'CC'),
+          borderColor: couleurs,
           borderWidth: 2,
           borderRadius: 4
         }]
@@ -377,29 +539,33 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
           tooltip: {
             callbacks: {
               label: function(context) {
-                return `IPP Moyen: ${context.parsed.y}%`;
+                const index = context.dataIndex;
+                return `${annees[index]} : ${context.parsed.y}%`;
               }
             }
           }
         },
         scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { callback: function(value) { return value + '%'; } }
+          y: { beginAtZero: true, ticks: { callback: function(value) { return value + '%'; } } }
+        },
+        onClick: (event: ChartEvent, elements: ActiveElement[]) => {
+          if (elements.length > 0) {
+            const index = elements[0].index;
+            this.naviguerParAnnee(annees[index]);
           }
         }
       }
     });
   }
 
-  // ✅ Graphique 4 : Montants RCC + RCM (barres groupées)
   creerGraphiqueMontants() {
     if (!this.chartMontantsRef) return;
 
     const ctx = this.chartMontantsRef.nativeElement.getContext('2d');
-    const annees = this.statsParAnnee.map(s => s.annee);
-    const rcc = this.statsParAnnee.map(s => Math.round(s.rccTotal / 1000));
-    const rcm = this.statsParAnnee.map(s => Math.round(s.rcmTotal / 1000));
+    const donneesTriees = [...this.statsParAnneeFiltrees].sort((a, b) => a.annee - b.annee);
+    const annees = donneesTriees.map(s => s.annee);
+    const rcc = donneesTriees.map(s => Math.round(s.rccTotal / 1000));
+    const rcm = donneesTriees.map(s => Math.round(s.rcmTotal / 1000));
 
     this.chartMontants = new Chart(ctx, {
       type: 'bar',
@@ -431,28 +597,32 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
           tooltip: {
             callbacks: {
               label: function(context) {
-                return `${context.dataset.label}: ${context.parsed.y} k DT`;
+                const index = context.dataIndex;
+                return `${annees[index]} - ${context.dataset.label}: ${context.parsed.y} k DT`;
               }
             }
           }
         },
         scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { callback: function(value) { return value + ' k DT'; } }
+          y: { beginAtZero: true, ticks: { callback: function(value) { return value + ' k DT'; } } }
+        },
+        onClick: (event: ChartEvent, elements: ActiveElement[]) => {
+          if (elements.length > 0) {
+            const index = elements[0].index;
+            this.naviguerParAnnee(annees[index]);
           }
         }
       }
     });
   }
 
-  // ✅ Graphique 5 : Évolution des règlements (NOUVEAU)
   creerGraphiqueReglements() {
     if (!this.chartReglementsRef) return;
 
     const ctx = this.chartReglementsRef.nativeElement.getContext('2d');
-    const annees = this.statsParAnnee.map(s => s.annee);
-    const totalReglements = this.statsParAnnee.map(s => Math.round((s.rccTotal + s.rcmTotal) / 1000));
+    const donneesTriees = [...this.statsParAnneeFiltrees].sort((a, b) => a.annee - b.annee);
+    const annees = donneesTriees.map(s => s.annee);
+    const totalReglements = donneesTriees.map(s => Math.round((s.rccTotal + s.rcmTotal) / 1000));
 
     this.chartReglements = new Chart(ctx, {
       type: 'line',
@@ -478,15 +648,19 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
           tooltip: {
             callbacks: {
               label: function(context) {
-                return `Règlements: ${context.parsed.y} k DT`;
+                const index = context.dataIndex;
+                return `${annees[index]} : ${context.parsed.y} k DT`;
               }
             }
           }
         },
         scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { callback: function(value) { return value + ' k DT'; } }
+          y: { beginAtZero: true, ticks: { callback: function(value) { return value + ' k DT'; } } }
+        },
+        onClick: (event: ChartEvent, elements: ActiveElement[]) => {
+          if (elements.length > 0) {
+            const index = elements[0].index;
+            this.naviguerParAnnee(annees[index]);
           }
         }
       }
@@ -502,24 +676,36 @@ export class DashboardSinistresComponent implements OnInit, AfterViewInit {
   }
 
   // ============================================================
-// MÉTHODES POUR LE TABLEAU DES STATISTIQUES PAR ANNÉE
-// ============================================================
+  // MÉTHODES POUR LE TABLEAU
+  // ============================================================
 
-getTotalGeneral(champ: string): number {
-  if (!this.statsParAnnee || this.statsParAnnee.length === 0) return 0;
-  return this.statsParAnnee.reduce((sum, stat) => {
-    const val = stat[champ as keyof StatsParAnnee];
-    return sum + (typeof val === 'number' ? val : 0);
-  }, 0);
-}
+  getTotalGeneral(champ: string): number {
+    if (!this.statsParAnneeFiltrees || this.statsParAnneeFiltrees.length === 0) return 0;
+    return this.statsParAnneeFiltrees.reduce((sum, stat) => {
+      const val = stat[champ as keyof StatsParAnnee];
+      return sum + (typeof val === 'number' ? val : 0);
+    }, 0);
+  }
 
-getMoyenneGenerale(champ: string): number {
-  if (!this.statsParAnnee || this.statsParAnnee.length === 0) return 0;
-  const total = this.statsParAnnee.reduce((sum, stat) => {
-    const val = stat[champ as keyof StatsParAnnee];
-    return sum + (typeof val === 'number' ? val : 0);
-  }, 0);
-  return Math.round((total / this.statsParAnnee.length) * 10) / 10;
-}
+  getMoyenneGenerale(champ: string): number {
+    if (!this.statsParAnneeFiltrees || this.statsParAnneeFiltrees.length === 0) return 0;
+    const total = this.statsParAnneeFiltrees.reduce((sum, stat) => {
+      const val = stat[champ as keyof StatsParAnnee];
+      return sum + (typeof val === 'number' ? val : 0);
+    }, 0);
+    return Math.round((total / this.statsParAnneeFiltrees.length) * 10) / 10;
+  }
 
+  // ✅ GETTERS POUR LE TEMPLATE
+  get globalStatsDisplay() {
+    return this.globalStatsFiltrees;
+  }
+
+  get topSinistresDisplay() {
+    return this.topSinistresFiltres;
+  }
+
+  get statsParAnneeDisplay() {
+    return this.statsParAnneeFiltrees;
+  }
 }

@@ -334,3 +334,36 @@
     flex-wrap: wrap;
   }
 }
+
+/* Ajouter dans gestion-utilisateurs.component.css */
+
+.btn-primary {
+  padding: 11px 20px;
+  border: 0;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: linear-gradient(135deg, #071b4d, #0b2f86);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(7, 27, 77, 0.2);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(7, 27, 77, 0.3);
+}
+
+.btn-password {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.btn-password:hover:not(:disabled) {
+  background: #ffe0b2;
+  transform: translateY(-2px);
+}

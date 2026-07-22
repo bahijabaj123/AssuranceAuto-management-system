@@ -49,10 +49,14 @@ import { FormulaireSinistreComponent } from './components/pages/sinistres/formul
 import { DashboardSinistresComponent } from './components/pages/sinistres/dashboard-sinistres/dashboard-sinistres.component';
 
 // ============================================================
-// ✅ AUDIT - HISTORIQUE DES MODIFICATIONS
+// AUDIT - HISTORIQUE DES MODIFICATIONS
 // ============================================================
 import { HistoriqueAuditComponent } from './components/pages/audit/historique-audit/historique-audit.component';
 import { DashboardAdminComponent } from './components/pages/admin/dashboard-admin/dashboard-admin.component';
+
+// ✅ AJOUTER L'IMPORT DE GestionUtilisateursComponent
+import { GestionUtilisateursComponent } from './components/pages/admin/gestion-utilisateurs/gestion-utilisateurs.component';
+
 // ============================================================
 // ROUTES
 // ============================================================
@@ -91,7 +95,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'dossiers', component: DossiersComponent },
       { path: 'dossier/:id', component: DossierDetailComponent },
-      { path: 'historique', component: HistoriqueComponent },  // Ancien historique IPP
+      { path: 'historique', component: HistoriqueComponent },
       { path: 'base-lesions', component: BaseLesionsComponent },
 
       // ---------- Gestion des dossiers ----------
@@ -117,17 +121,15 @@ export const routes: Routes = [
       { path: 'sinistres/formulaire/:id', component: FormulaireSinistreComponent },
       { path: 'sinistres/dashboard', component: DashboardSinistresComponent },
 
-      // ============================================================
-      // ✅ AUDIT - HISTORIQUE DES MODIFICATIONS
-      // ============================================================
+      // ---------- Admin ----------
       { path: 'historique-audit', component: HistoriqueAuditComponent, canActivate: [authGuard] },
       { path: 'admin/dashboard', component: DashboardAdminComponent, canActivate: [authGuard] },
+      
+      // ✅ ROUTE GESTION UTILISATEURS
+      { path: 'admin/utilisateurs', component: GestionUtilisateursComponent, canActivate: [authGuard] },
 
-      // ✅ NOUVEAU : Page des alertes
+      // ---------- Alertes ----------
       { path: 'alertes', component: ListeAlertesComponent, canActivate: [authGuard] },
-
-      // ✅ NOUVEAU : Route pour afficher un dossier par numDos (numéro de sinistre)
-      { path: 'etat-suivi/dossier/:numDos', component: EtatSuiviComponent, canActivate: [authGuard] },
 
       // ---------- Route par défaut après login ----------
       { path: '', redirectTo: '/gestion/recherche-dossier', pathMatch: 'full' }
