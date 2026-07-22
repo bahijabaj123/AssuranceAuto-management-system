@@ -25,7 +25,7 @@ export class RechercheDossierComponent {
   currentUserId: number = 0;
   users: any[] = [];
 
-  private api = 'http://localhost:8081/api';
+  private api = 'https://carte-assurance-backend.onrender.com/api';
 
   constructor(
     private http: HttpClient,

@@ -385,7 +385,7 @@ export class DashboardAdminComponent implements OnInit, AfterViewInit {
   }
   synchroniserTousLesDossiers() {
   this.isLoading = true;
-  this.http.post('http://localhost:8081/api/synchronisation/tous-les-dossiers', {}).subscribe({
+  this.http.post('https://carte-assurance-backend.onrender.com/api/synchronisation/tous-les-dossiers', {}).subscribe({
     next: (response: any) => {
       this.toastService.success(`✅ ${response.message} - ${response.totalDossiers} dossiers traités`, 5000);
       this.isLoading = false;
