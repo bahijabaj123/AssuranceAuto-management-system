@@ -7,7 +7,7 @@ import { DossierProvisoireService } from '../../../../services/dossier-provisoir
 import { ToastService } from '../../../../services/toast.service';
 import { ExportService } from '../../../../services/export.service';
 import {ChangeDetectorRef } from '@angular/core';
-
+import { ModalService } from '../../../../services/modal.service';
 
 @Component({
   selector: 'app-doss-provisoires',
@@ -35,6 +35,7 @@ export class DossProvisoiresComponent implements OnInit {
     private dossierService: DossierProvisoireService,
     private toastService: ToastService,
     private router: Router,
+    private modalService: ModalService,
     private cdr: ChangeDetectorRef,
     private exportService: ExportService
   ) {}
@@ -107,20 +108,26 @@ export class DossProvisoiresComponent implements OnInit {
     this.router.navigate(['/gestion/formulaire/doss-provisoires', id]);
   }
 
-  supprimer(id: number | undefined, event: Event) {
-    event.stopPropagation();
-    if (id == null) return;
-    if (!confirm(`Supprimer ce dossier provisoire ?`)) return;
+ // src/app/components/pages/gestion/doss-provisoires/doss-provisoires.component.ts
 
-    this.dossierService.delete(id).subscribe({
-      next: () => {
-        this.toastService.success('Dossier supprimé');
-        this.chargerDossiers();
-      },
-      error: () => this.toastService.error('Erreur lors de la suppression')
-    });
-  }
+async supprimer(id: number | undefined, event: Event): Promise<void> {
+  event.stopPropagation();
+  if (id == null) return;
 
+  const confirmed = await this.modalService.confirmDelete('dossier provisoire');
+  if (!confirmed) return;
+
+  this.dossierService.delete(id).subscribe({
+    next: () => {
+      this.toastService.deleteSuccess('Dossier provisoire');
+      this.chargerDossiers();
+    },
+    error: (err) => {
+      console.error('❌ Erreur:', err);
+      this.toastService.deleteError('dossier provisoire');
+    }
+  });
+}
   // src/app/components/pages/gestion/doss-provisoires/doss-provisoires.component.ts
 exporterExcel() {
   if (this.filteredDossiers.length === 0) {

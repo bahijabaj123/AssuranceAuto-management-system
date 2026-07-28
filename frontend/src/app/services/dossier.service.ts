@@ -7,7 +7,7 @@ import { Dossier } from '../models/dossier.model';
   providedIn: 'root'
 })
 export class DossierService {
-  private baseUrl = 'https://carte-assurance-backend.onrender.com/api';
+  private baseUrl = 'http://localhost:8081/api';
 
   constructor(private http: HttpClient) {}
 

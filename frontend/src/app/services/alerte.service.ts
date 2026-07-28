@@ -8,7 +8,7 @@ import { Alerte } from '../models/alerte.model';
   providedIn: 'root'
 })
 export class AlerteService {
-  private apiUrl = 'https://carte-assurance-backend.onrender.com/api/alertes';
+  private apiUrl = 'http://localhost:8081/api/alertes';
 
   constructor(private http: HttpClient) {}
 

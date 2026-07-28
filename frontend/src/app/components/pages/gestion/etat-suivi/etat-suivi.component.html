@@ -202,6 +202,13 @@
               <button class="btn-delete" title="Supprimer" (click)="supprimer(d.id, $event)">
                 <i class="fa fa-trash-o" aria-hidden="true"></i>
               </button>
+              <button 
+    *ngIf="!isOwner(d)" 
+    class="btn-view" 
+    title="Aperçu" 
+    (click)="goToView(d.id); $event.stopPropagation()">
+    <i class="fa fa-eye" aria-hidden="true"></i>
+  </button>
             </td>
           </tr>
         </tbody>

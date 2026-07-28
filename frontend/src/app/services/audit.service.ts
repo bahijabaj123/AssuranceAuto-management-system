@@ -9,7 +9,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class AuditService {
-  private apiUrl = 'https://carte-assurance-backend.onrender.com/api/audit';
+  private apiUrl = 'http://localhost:8081/api/audit';
 
   constructor(
     private http: HttpClient,

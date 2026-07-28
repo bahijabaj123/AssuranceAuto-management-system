@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class GestionService {
-  private baseUrl = 'https://carte-assurance-backend.onrender.com/api';
+  private baseUrl = 'http://localhost:8081/api';
 
   constructor(private http: HttpClient) {}
 
