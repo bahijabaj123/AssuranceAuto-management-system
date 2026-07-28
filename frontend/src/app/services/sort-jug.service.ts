@@ -6,7 +6,7 @@ import { SortJug } from '../models/sort-jug.model';
 
 @Injectable({ providedIn: 'root' })
 export class SortJugService {
-  private apiUrl = 'http://localhost:8081/api/sort-jug';
+  private apiUrl = 'https://carte-assurance-backend.onrender.com/api/sort-jug';
 
   constructor(private http: HttpClient) {}
 

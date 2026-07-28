@@ -41,7 +41,7 @@ public class AlerteService {
   // ─────────────────────────────────────────────────────────────
   //  SCHEDULER — chaque jour à 9h00
   // ─────────────────────────────────────────────────────────────
-  @Scheduled(cron = "${app.alerte.cron:0 0 10 * * *}")
+  @Scheduled(cron = "${app.alerte.cron:0 30 9 * * *}")
   @Transactional
   public void calculerAlertes() {
     log.info("🚀 Calcul des alertes — {}", LocalDate.now());
@@ -230,41 +230,6 @@ public class AlerteService {
     calculerAlertes();
     return "✅ Calcul des alertes terminé";
   }
-
-  // src/main/java/com/carte/estimateurippbackend/service/AlerteService.java
-  //methode de test du mail
-  @Transactional
-  public String envoyerEmailTest(String destinataire, String message) {
-    try {
-      // Créer une alerte test
-      Alerte alerte = new Alerte();
-      alerte.setNumDos("TEST-001");
-      alerte.setNature("CIV");
-      alerte.setMessage(message != null ? message : "Ceci est un email de test");
-      alerte.setDateCreation(LocalDate.now());
-      alerte.setEmailEnvoye(false);
-
-      // Simuler un utilisateur
-      Utilisateur utilisateur = utilisateurRepository.findByEmail(destinataire).orElse(null);
-      if (utilisateur == null) {
-        return "❌ Utilisateur non trouvé: " + destinataire;
-      }
-
-      alerte.setUtilisateur(utilisateur);
-      alerte.setIdUtilisateur(utilisateur.getId());
-
-      // Envoyer l'email
-      emailService.envoyerEmailAlertes(utilisateur, List.of(alerte));
-
-      log.info("📧 Email test envoyé à {}", destinataire);
-      return "✅ Email test envoyé à " + destinataire;
-
-    } catch (Exception e) {
-      log.error("❌ Erreur email test: {}", e.getMessage());
-      return "❌ Erreur: " + e.getMessage();
-    }
-  }
-
 
   // ─────────────────────────────────────────────────────────────
   //  Conversion en DTO

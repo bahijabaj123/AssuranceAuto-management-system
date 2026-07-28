@@ -171,11 +171,6 @@
                 <button class="action-btn edit" (click)="goToEdit('suivi', item.id)" [disabled]="!isProprietaire(item.idUtilisateur)">
                   <i class="fa fa-pencil" aria-hidden="true"></i> Modifier
                 </button>
-                <button *ngIf="!isProprietaire(item.idUtilisateur)" 
-                  class="action-btn view" 
-                  (click)="goToView('suivi', item.id)">
-            <i class="fa fa-eye" aria-hidden="true"></i> Aperçu
-          </button>
                 <button class="action-btn delete" (click)="supprimer('suivi', item.id)" [disabled]="!isProprietaire(item.idUtilisateur)">
                   <i class="fa fa-trash-o" aria-hidden="true"></i>
                 </button>

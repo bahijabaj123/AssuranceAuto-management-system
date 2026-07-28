@@ -6,7 +6,7 @@ import { DossierArt18 } from '../models/dossier-art18.model';
 
 @Injectable({ providedIn: 'root' })
 export class DossArt18Service {
-  private apiUrl = 'http://localhost:8081/api/doss-art18';
+  private apiUrl = 'https://carte-assurance-backend.onrender.com/api/doss-art18';
 
   constructor(private http: HttpClient) {}
 

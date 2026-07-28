@@ -8,7 +8,6 @@ import { DonneesSinistreService } from '../../../../services/donnees-sinistre.se
 import { ToastService } from '../../../../services/toast.service';
 import { ExportService } from '../../../../services/export.service';
 import { DonneesSinistre } from '../../../../models/donnees-sinistre.model';
-import { ModalService } from '../../../../services/modal.service';
 
 @Component({
   selector: 'app-liste-sinistres',
@@ -48,7 +47,6 @@ export class ListeSinistresComponent implements OnInit {
     private exportService: ExportService,
     private router: Router,
     private route: ActivatedRoute,
-     private modalService: ModalService,
     private cdr: ChangeDetectorRef
   ) {
     for (let i = 2020; i <= 2030; i++) {
@@ -253,23 +251,28 @@ export class ListeSinistresComponent implements OnInit {
     this.router.navigate(['/sinistres/formulaire', id]);
   }
 
-  async supprimerSinistre(id: number | undefined, sin: string): Promise<void> {
-  if (!id) return;
+  supprimerSinistre(id: number | undefined, sin: string) {
+    if (!id) return;
 
-  const confirmed = await this.modalService.confirmDelete(`sinistre ${sin}`);
-  if (!confirmed) return;
-
-  this.sinistreService.delete(id).subscribe({
-    next: () => {
-      this.toastService.deleteSuccess(`Sinistre ${sin}`);
-      this.chargerSinistres();
-    },
-    error: (err) => {
-      console.error('❌ Erreur:', err);
-      this.toastService.deleteError('sinistre');
-    }
-  });
-}
+    this.toastService.confirmDelete(
+      `sinistre ${sin}`,
+      () => {
+        this.sinistreService.delete(id).subscribe({
+          next: () => {
+            this.toastService.deleteSuccess(`Sinistre ${sin}`);
+            this.chargerSinistres();
+          },
+          error: (err) => {
+            console.error('❌ Erreur:', err);
+            this.toastService.deleteError('sinistre');
+          }
+        });
+      },
+      () => {
+        this.toastService.info('Suppression annulée', 2000);
+      }
+    );
+  }
 
   exporterExcel() {
     if (this.filteredSinistres.length === 0) {

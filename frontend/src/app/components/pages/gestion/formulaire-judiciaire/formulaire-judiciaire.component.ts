@@ -6,7 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DossierJudiciaire, dossierJudiciaireVide, NATURES_AFFAIRE, REGIONS } from '../../../../models/dossier-judiciaire.model';
 import { DossierJudiciaireService } from '../../../../services/dossier-judiciaire.service';
 import { ToastService } from '../../../../services/toast.service';
-import { AuthService } from '../../../../services/auth.service';  
+import { AuthService } from '../../../../services/auth.service';  // ✅ AJOUTER
 
 @Component({
   selector: 'app-formulaire-judiciaire',
@@ -20,7 +20,6 @@ export class FormulaireJudiciaireComponent implements OnInit {
   dossier: DossierJudiciaire = dossierJudiciaireVide();
   isEditMode = false;
   isSaving = false;
-  isViewMode = false;  
   isLoading = true;
   isDataLoaded = false;
   dossierId: number | null = null;
@@ -47,11 +46,6 @@ export class FormulaireJudiciaireComponent implements OnInit {
     this.route.paramMap.subscribe(params => {
       const idParam = params.get('id');
       console.log('🔍 ID param reçu:', idParam);
-
-      this.route.queryParams.subscribe(queryParams => {
-        this.isViewMode = queryParams['mode'] === 'view';
-      });
-
       
       if (idParam && idParam !== 'nouveau') {
         this.dossierId = +idParam;
@@ -128,11 +122,6 @@ export class FormulaireJudiciaireComponent implements OnInit {
   }
 
   enregistrer() {
-    if (this.isViewMode) {
-      this.toastService.warning('⚠️ Vous êtes en mode consultation, vous ne pouvez pas modifier ce dossier', 4000);
-      return;
-    }
-
     if (!this.dossier.numDos || !this.dossier.numDos.trim()) {
       this.toastService.error('Le numéro de dossier est obligatoire');
       return;

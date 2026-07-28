@@ -40,7 +40,7 @@ export interface StatsGlobales {
   providedIn: 'root'
 })
 export class StatistiquesAdminService {
-  private apiUrl = 'http://localhost:8081/api';
+  private apiUrl = 'https://carte-assurance-backend.onrender.com/api';
 
   constructor(private http: HttpClient) {}
 

@@ -3,7 +3,6 @@ package com.carte.estimateurippbackend.service;
 import com.carte.estimateurippbackend.entity.DonneesSinistre;
 import com.carte.estimateurippbackend.entity.SuiviDossier;
 import com.carte.estimateurippbackend.repository.DonneesSinistreRepository;
-import com.carte.estimateurippbackend.repository.SuiviDossierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,7 @@ import java.util.List;
 public class SynchronisationSinistreService {
 
   private final DonneesSinistreRepository donneesSinistreRepository;
-  private final SuiviDossierRepository suiviDossierRepository;
+
   /**
    * Synchronise les données d'un dossier vers la table donnees_sinistres
    * Appelé après création ou mise à jour d'un dossier dans suivi_dossiers
@@ -114,29 +113,15 @@ public class SynchronisationSinistreService {
   @Transactional
   public void synchroniserTousLesDossiers(List<SuiviDossier> dossiers) {
     int compteur = 0;
-    int ignores = 0;
-
     for (SuiviDossier dossier : dossiers) {
       try {
-        // ✅ Vérifier combien de lignes existent
-        String numDos = dossier.getNumDos();
-        List<SuiviDossier> dossiersSuivi = suiviDossierRepository.findAllByNumDos(numDos); // ✅ MODIFIÉ
-        List<DonneesSinistre> sinistresExistants = donneesSinistreRepository.findBySinContaining(numDos);
-
-        // ✅ Ne synchroniser que si 1:1
-        if (dossiersSuivi.size() == 1 && sinistresExistants.size() == 1) {
-          synchroniserVersDonneesSinistres(dossier);
-          compteur++;
-        } else {
-          log.debug("⏭️ Ignoré {} : {} ligne(s) dans suivi, {} ligne(s) dans sinistres",
-            numDos, dossiersSuivi.size(), sinistresExistants.size());
-          ignores++;
-        }
+        synchroniserVersDonneesSinistres(dossier);
+        compteur++;
       } catch (Exception e) {
         log.error("❌ Erreur lors de la synchronisation du dossier {}: {}", dossier.getNumDos(), e.getMessage());
       }
     }
-    log.info("✅ Synchronisation terminée: {} dossiers synchronisés, {} ignorés", compteur, ignores);
+    log.info("✅ Synchronisation terminée: {} dossiers traités", compteur);
   }
 
   private Integer extraireAnnee(String numDos) {

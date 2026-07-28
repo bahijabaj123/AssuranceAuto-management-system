@@ -46,18 +46,4 @@ export class ModalService {
       this.resolveCallback = undefined;
     }
   }
-
-   confirmDelete(entityName: string): Promise<boolean> {
-    return this.confirm(
-      `Confirmer la suppression de ce ${entityName} ?`,
-      '⚠️ Suppression définitive',
-      {
-        confirmText: 'Supprimer',
-        cancelText: 'Annuler',
-        type: 'danger',
-        details: 'Cette action est irréversible. Toutes les données associées seront supprimées définitivement.'
-      }
-    );
-  }
-  
 }

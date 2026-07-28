@@ -19,7 +19,6 @@ public interface SuiviDossierRepository extends JpaRepository<SuiviDossier, Long
 
   //  RECHERCHE EXACTE PAR NUMERO DE DOSSIER (pour le propriétaire)
   Optional<SuiviDossier> findByNumDos(String numDos);
-  List<SuiviDossier> findAllByNumDos(String numDos);
 
   //  FILTRAGE PAR UTILISATEUR
   List<SuiviDossier> findByIdUtilisateur(Long idUtilisateur);

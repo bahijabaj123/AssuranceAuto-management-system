@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class RechercheDossierService {
-  private apiUrl = 'http://localhost:8081/api/recherche-dossier';
+  private apiUrl = 'https://carte-assurance-backend.onrender.com/api/recherche-dossier';
 
   constructor(private http: HttpClient) {}
 

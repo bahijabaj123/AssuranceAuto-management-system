@@ -7,7 +7,7 @@ import { Lesion } from '../models/lesion';
   providedIn: 'root'
 })
 export class LesionService {
-  private baseUrl = 'http://localhost:8081/api';
+  private baseUrl = 'https://carte-assurance-backend.onrender.com/api';
 
   constructor(private http: HttpClient) {}
 

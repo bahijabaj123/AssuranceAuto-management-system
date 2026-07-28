@@ -31,20 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-# ============================================================
-# FICHIERS SENSIBLES - NE PAS COMMITTER
-# ============================================================
-**/src/main/resources/application.properties
-**/src/main/resources/application-dev.properties
-**/src/main/resources/application-prod.properties
-**/application.properties
-*.secret
-*.key
-*.pem
-*.p12
-*.keystore
-*.truststore
-.env
-.env.local
-.env.*.local

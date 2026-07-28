@@ -290,24 +290,6 @@ export class EtatSuiviComponent implements OnInit {
     this.applyFilters();
   }
 
-  // src/app/components/pages/gestion/etat-suivi/etat-suivi.component.ts
-
-// ✅ AJOUTER CETTE MÉTHODE (si elle n'existe pas)
-goToView(id: number) {
-  if (id == null) return;
-  
-  const dossier = this.allDossiers.find(d => d.id === id);
-  if (!dossier) {
-    this.toastService.error('❌ Dossier introuvable', 3000);
-    return;
-  }
-  
-  // ✅ Navigation vers la vue en lecture seule
-  this.router.navigate(['/gestion/formulaire-judiciaire', id], { 
-    queryParams: { mode: 'view' }
-  });
-}
-
   goToEdit(id: number) {
     if (id == null) return;
     

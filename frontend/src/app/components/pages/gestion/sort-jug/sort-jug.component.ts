@@ -6,8 +6,6 @@ import { Router, RouterModule } from '@angular/router';
 import { SortJugService } from '../../../../services/sort-jug.service';
 import { ToastService } from '../../../../services/toast.service';
 import { ExportService } from '../../../../services/export.service';
-import { ModalService } from '../../../../services/modal.service';
-
 
 @Component({
   selector: 'app-sort-jug',
@@ -42,7 +40,6 @@ export class SortJugComponent implements OnInit {
     private sortJugService: SortJugService,
     private toastService: ToastService,
     private router: Router,
-      private modalService: ModalService,
     private cdr: ChangeDetectorRef,
     private exportService: ExportService
   ) {}
@@ -155,29 +152,22 @@ export class SortJugComponent implements OnInit {
     this.router.navigate(['/gestion/formulaire-sort-jug', id]);
   }
 
- // src/app/components/pages/gestion/sort-jug/sort-jug.component.ts
+  supprimer(id: number, event: Event) {
+    event.stopPropagation();
+    if (id == null) return;
+    if (!confirm('Confirmer la suppression ?')) return;
 
-// src/app/components/pages/gestion/sort-jug/sort-jug.component.ts
-
-// ✅ MODIFIER LA MÉTHODE supprimer()
-async supprimer(id: number, event: Event): Promise<void> {
-  event.stopPropagation();
-  if (id == null) return;
-
-  const confirmed = await this.modalService.confirmDelete('jugement');
-  if (!confirmed) return;
-
-  this.sortJugService.delete(id).subscribe({
-    next: () => {
-      this.toastService.deleteSuccess('Jugement');
-      this.chargerDossiers();
-    },
-    error: (err) => {
-      console.error('❌ Erreur:', err);
-      this.toastService.deleteError('jugement');
-    }
-  });
-}
+    this.sortJugService.delete(id).subscribe({
+      next: () => {
+        this.toastService.success('Jugement supprimé');
+        this.chargerDossiers();
+      },
+      error: (err) => {
+        console.error('❌ Erreur:', err);
+        this.toastService.error('Erreur lors de la suppression');
+      }
+    });
+  }
 
    exporterExcel() {
     if (this.filteredDossiers.length === 0) {

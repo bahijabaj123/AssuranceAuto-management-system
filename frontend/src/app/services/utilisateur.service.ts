@@ -8,7 +8,7 @@ import { Utilisateur } from '../models/utilisateur.model';
   providedIn: 'root'
 })
 export class UtilisateurService {
-  private apiUrl = 'http://localhost:8081/api/utilisateurs';
+  private apiUrl = 'https://carte-assurance-backend.onrender.com/api/utilisateurs';
 
   constructor(private http: HttpClient) {}
 

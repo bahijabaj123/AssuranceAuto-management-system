@@ -17,17 +17,10 @@
       </div>
       <p class="f-sub">Bureau corporel — Carte Assurances</p>
 
-       <!-- ✅ Badge Mode -->
-      <div class="mode-badge" *ngIf="isEditMode && !isViewMode">
+      <div class="mode-badge" *ngIf="isEditMode">
         <i class="fa fa-pencil" aria-hidden="true"></i>
         Mode édition — Dossier N° {{ dossier.numDos }}
       </div>
-      
-      <div class="mode-badge view-mode" *ngIf="isViewMode">
-        <i class="fa fa-eye" aria-hidden="true"></i>
-        Mode consultation — Dossier N° {{ dossier.numDos }}
-      </div>
-
       <div class="mode-badge new-mode" *ngIf="!isEditMode">
         <i class="fa fa-plus" aria-hidden="true"></i>
         Nouveau dossier judiciaire
