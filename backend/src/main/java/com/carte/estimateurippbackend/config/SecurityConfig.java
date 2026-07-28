@@ -33,6 +33,7 @@ public class SecurityConfig {
       .authorizeHttpRequests(auth -> auth
         // ✅ Endpoints publics
         .requestMatchers("/api/auth/**").permitAll()
+        .requestMatchers("/health").permitAll()
         // ✅ Endpoints d'audit (admin uniquement)
         .requestMatchers("/api/audit/all").hasRole("ADMIN")
         .requestMatchers("/api/tiers-sinistres/**").authenticated()
@@ -50,7 +51,8 @@ public class SecurityConfig {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(Arrays.asList(
       "http://localhost:4200",
-      "http://localhost:4201"
+      "http://localhost:4201",
+      "https://assurance-auto-management-system.vercel.app"
     ));
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(Arrays.asList("*"));
