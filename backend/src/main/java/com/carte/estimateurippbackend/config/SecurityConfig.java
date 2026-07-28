@@ -50,8 +50,7 @@ public class SecurityConfig {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(Arrays.asList(
       "http://localhost:4200",
-      "http://localhost:4201",
-      "https://assurance-auto-management-system.vercel.app"
+      "http://localhost:4201"
     ));
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(Arrays.asList("*"));

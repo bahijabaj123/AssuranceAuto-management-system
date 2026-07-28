@@ -6,6 +6,8 @@ import { Router, RouterModule } from '@angular/router';
 import { DossArt18Service } from '../../../../services/doss-art18.service';
 import { ToastService } from '../../../../services/toast.service';
 import { ExportService } from '../../../../services/export.service';
+import { ModalService } from '../../../../services/modal.service'; // ✅ AJOUTER
+
 
 @Component({
   selector: 'app-doss-art18',
@@ -34,6 +36,7 @@ export class DossArt18Component implements OnInit {
     private art18Service: DossArt18Service,
     private toastService: ToastService,
     private router: Router,
+      private modalService: ModalService,
     private cdr: ChangeDetectorRef,
     private exportService: ExportService
   ) {}
@@ -116,22 +119,27 @@ export class DossArt18Component implements OnInit {
     this.router.navigate(['/gestion/formulaire-art18', id]);
   }
 
-  supprimer(id: number, event: Event) {
-    event.stopPropagation();
-    if (id == null) return;
-    if (!confirm('Confirmer la suppression ?')) return;
+  // src/app/components/pages/gestion/doss-art18/doss-art18.component.ts
 
-    this.art18Service.delete(id).subscribe({
-      next: () => {
-        this.toastService.success('Dossier supprimé');
-        this.chargerDossiers();
-      },
-      error: (err) => {
-        console.error('❌ Erreur:', err);
-        this.toastService.error('Erreur lors de la suppression');
-      }
-    });
-  }
+// ✅ MODIFIER LA MÉTHODE supprimer()
+async supprimer(id: number, event: Event): Promise<void> {
+  event.stopPropagation();
+  if (id == null) return;
+
+  const confirmed = await this.modalService.confirmDelete('dossier Art 18');
+  if (!confirmed) return;
+
+  this.art18Service.delete(id).subscribe({
+    next: () => {
+      this.toastService.deleteSuccess('Dossier Art 18');
+      this.chargerDossiers();
+    },
+    error: (err) => {
+      console.error('❌ Erreur:', err);
+      this.toastService.deleteError('dossier Art 18');
+    }
+  });
+}
 
   exporterExcel() {
     if (this.filteredDossiers.length === 0) {

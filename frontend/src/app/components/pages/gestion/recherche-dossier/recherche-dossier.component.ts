@@ -8,6 +8,7 @@ import { catchError } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ToastService } from '../../../../services/toast.service';
 import { AuthService } from '../../../../services/auth.service';
+import { ModalService } from '../../../../services/modal.service';
 
 @Component({
   selector: 'app-recherche-dossier',
@@ -32,6 +33,7 @@ export class RechercheDossierComponent {
     private toastService: ToastService,
     private router: Router,
     private authService: AuthService,
+    private modalService: ModalService,
     private cdr: ChangeDetectorRef
   ) {
     this.currentUserId = this.authService.getCurrentUserId();
@@ -153,6 +155,34 @@ export class RechercheDossierComponent {
     });
   }
 
+  goToView(table: string, id: number) {
+  const dossier = this.getDossierById(table, id);
+  if (!dossier) {
+    this.toastService.error('Dossier introuvable');
+    return;
+  }
+  
+  // ✅ Pour donnees_sinistres, rediriger vers formulaire-sinistre
+  if (table === 'donneesSinistres') {
+    this.router.navigate(['/sinistres/formulaire', id], { 
+      queryParams: { mode: 'view' }
+    });
+    return;
+  }
+  
+  const routes: Record<string, string> = {
+    suivi: '/gestion/formulaire-judiciaire',
+    sortJug: '/gestion/formulaire-sort-jug',
+    provisoire: '/gestion/formulaire/doss-provisoires',
+    art18: '/gestion/formulaire-art18'
+  };
+  
+  // ✅ Navigation en mode consultation
+  this.router.navigate([routes[table], id], { 
+    queryParams: { mode: 'view' }
+  });
+}
+
   goToEdit(table: string, id: number) {
     const dossier = this.getDossierById(table, id);
     if (!dossier) {
@@ -160,24 +190,31 @@ export class RechercheDossierComponent {
       return;
     }
     
-    // ✅ Pour donnees_sinistres, rediriger vers formulaire-sinistre
+    // ✅ Données sinistres - tout le monde peut modifier
     if (table === 'donneesSinistres') {
       this.router.navigate(['/sinistres/formulaire', id]);
       return;
     }
-    
-    if (!this.isProprietaire(dossier.idUtilisateur)) {
-      this.toastService.error('Vous ne pouvez pas modifier ce dossier');
+
+    // ✅ Sort Jug, Provisoire, Art 18 - tout le monde peut modifier
+    if (table === 'sortJug' || table === 'provisoire' || table === 'art18') {
+      const routes: Record<string, string> = {
+        sortJug: '/gestion/formulaire-sort-jug',
+        provisoire: '/gestion/formulaire/doss-provisoires',
+        art18: '/gestion/formulaire-art18'
+      };
+      this.router.navigate([routes[table], id]);
       return;
     }
     
-    const routes: Record<string, string> = {
-      suivi: '/gestion/formulaire-judiciaire',
-      sortJug: '/gestion/formulaire-sort-jug',
-      provisoire: '/gestion/formulaire/doss-provisoires',
-      art18: '/gestion/formulaire-art18'
-    };
-    this.router.navigate([routes[table], id]);
+    // ✅ Suivi - SEUL le propriétaire peut modifier
+    if (table === 'suivi') {
+      if (!this.isProprietaire(dossier.idUtilisateur)) {
+        this.toastService.error('⚠️ Vous ne pouvez pas modifier ce dossier car vous n\'êtes pas le propriétaire', 4000);
+        return;
+      }
+      this.router.navigate(['/gestion/formulaire-judiciaire', id]);
+    }
   }
 
   getDossierById(table: string, id: number): any {
@@ -186,51 +223,85 @@ export class RechercheDossierComponent {
     return list.find((d: any) => d.id === id);
   }
 
-  supprimer(table: string, id: number) {
+  async supprimer(table: string, id: number): Promise<void> {
     const dossier = this.getDossierById(table, id);
     if (!dossier) {
       this.toastService.error('Dossier introuvable');
       return;
     }
-    
-    // ✅ Pour donnees_sinistres, utiliser le bon endpoint
+
+    // ✅ Données sinistres - tout le monde peut supprimer
     if (table === 'donneesSinistres') {
-      if (!confirm(`Supprimer cet enregistrement de sinistre ?`)) return;
+      const confirmed = await this.modalService.confirmDelete('sinistre');
+      if (!confirmed) return;
+
       this.http.delete(`${this.api}/donnees-sinistres/${id}`).subscribe({
         next: () => {
-          this.toastService.success('Sinistre supprimé');
+          this.toastService.deleteSuccess('Sinistre');
           this.rechercher();
         },
         error: () => {
-          this.toastService.error('Erreur lors de la suppression');
+          this.toastService.deleteError('sinistre');
         }
       });
       return;
     }
-    
-    if (!this.isProprietaire(dossier.idUtilisateur)) {
-      this.toastService.error('Vous ne pouvez pas supprimer ce dossier');
+
+    // ✅ Sort Jug, Provisoire, Art 18 - tout le monde peut supprimer
+    if (table === 'sortJug' || table === 'provisoire' || table === 'art18') {
+      const nomTable = this.getTableLabel(table);
+      const confirmed = await this.modalService.confirmDelete(nomTable.toLowerCase());
+      if (!confirmed) return;
+
+      const endpoints: Record<string, string> = {
+        sortJug: 'sort-jug',
+        provisoire: 'dossiers-provisoires',
+        art18: 'doss-art18'
+      };
+
+      this.http.delete(`${this.api}/${endpoints[table]}/${id}`).subscribe({
+        next: () => {
+          this.toastService.deleteSuccess(nomTable);
+          this.rechercher();
+        },
+        error: () => {
+          this.toastService.deleteError(nomTable.toLowerCase());
+        }
+      });
       return;
     }
-    
-    if (!confirm(`Supprimer cet enregistrement de ${table} ?`)) return;
-    
-    const endpoints: Record<string, string> = {
-      suivi: 'suivi-dossiers',
-      sortJug: 'sort-jug',
-      provisoire: 'dossiers-provisoires',
-      art18: 'doss-art18'
-    };
-    
-    this.http.delete(`${this.api}/${endpoints[table]}/${id}`).subscribe({
-      next: () => {
-        this.toastService.success('Enregistrement supprimé');
-        this.rechercher();
-      },
-      error: () => {
-        this.toastService.error('Erreur lors de la suppression');
+
+    // ✅ Suivi - SEUL le propriétaire peut supprimer
+    if (table === 'suivi') {
+      if (!this.isProprietaire(dossier.idUtilisateur)) {
+        this.toastService.error('⚠️ Vous ne pouvez pas supprimer ce dossier car vous n\'êtes pas le propriétaire', 4000);
+        return;
       }
-    });
+
+      const confirmed = await this.modalService.confirmDelete('dossier');
+      if (!confirmed) return;
+
+      this.http.delete(`${this.api}/suivi-dossiers/${id}`).subscribe({
+        next: () => {
+          this.toastService.deleteSuccess('Dossier');
+          this.rechercher();
+        },
+        error: () => {
+          this.toastService.deleteError('dossier');
+        }
+      });
+    }
+  }
+
+   getTableLabel(table: string): string {
+    const labels: Record<string, string> = {
+      suivi: 'Dossier suivi',
+      sortJug: 'Dossier Sort Jug',
+      provisoire: 'Dossier provisoire',
+      art18: 'Dossier Art 18',
+      donneesSinistres: 'Sinistre'
+    };
+    return labels[table] || 'Dossier';
   }
 
   goToCreate(table: string) {
