@@ -40,7 +40,6 @@
 - 6 graphiques dynamiques (évolution, répartition IPP, montants, règlements)
 - KPI en temps réel (Total sinistres, IPP moyen, NBR JRS moyen)
 - Indicateurs de tendance (Hausse / Baisse / Stable)
-- Top 5 des sinistres
 - Derniers sinistres ajoutés
 
 ### 📋 Gestion des Sinistres
